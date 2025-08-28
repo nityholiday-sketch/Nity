@@ -33,7 +33,7 @@ export function Header() {
       "sticky top-0 z-50 w-full transition-all duration-300",
       isScrolled ? "bg-background/95 shadow-md backdrop-blur-sm" : "bg-transparent"
     )}>
-      <div className="container mx-auto flex h-20 items-center px-4 md:px-6">
+      <div className="container mx-auto flex h-24 items-center px-4 md:px-6">
         <Link href="/" className="mr-6 flex items-center">
           <Logo />
         </Link>
