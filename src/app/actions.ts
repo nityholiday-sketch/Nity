@@ -2,12 +2,15 @@
 
 import { z } from "zod";
 import { generatePersonalizedTravelTips } from "@/ai/flows/personalized-travel-tips";
+import { ContactFormSchema } from "@/components/contact-form";
 
+// Define the schema for the AI tips form input
 const TravelTipsSchema = z.object({
   tourPackageName: z.string({
     required_error: "Please select a tour package.",
   }),
 });
+
 
 export async function getAITipsAction(values: z.infer<typeof TravelTipsSchema>) {
   try {
@@ -19,12 +22,6 @@ export async function getAITipsAction(values: z.infer<typeof TravelTipsSchema>) 
   }
 }
 
-export const ContactFormSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters."),
-  email: z.string().email("Please enter a valid email."),
-  subject: z.string().min(5, "Subject must be at least 5 characters."),
-  message: z.string().min(10, "Message must be at least 10 characters."),
-});
 
 export async function contactAction(data: z.infer<typeof ContactFormSchema>) {
   // Here you would typically send an email or store the inquiry in a database.

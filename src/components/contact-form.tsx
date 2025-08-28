@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { contactAction } from "@/app/actions";
 
-const ContactFormSchema = z.object({
+export const ContactFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   email: z.string().email("Please enter a valid email."),
   subject: z.string().min(5, "Subject must be at least 5 characters."),
