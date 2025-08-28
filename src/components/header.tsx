@@ -12,8 +12,7 @@ import { Logo } from "@/components/logo";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/packages", label: "Packages" },
-  { href: "/blog", label: "Blog" },
-  { href: "/about", label: "Who We Are" },
+  { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -32,9 +31,9 @@ export function Header() {
   return (
     <header className={cn(
       "sticky top-0 z-50 w-full transition-all duration-300",
-      isScrolled ? "bg-background/80 shadow-md backdrop-blur-md" : "bg-transparent"
+      isScrolled ? "bg-background/95 shadow-md backdrop-blur-sm" : "bg-transparent"
     )}>
-      <div className="container mx-auto flex h-16 items-center px-4 md:px-6">
+      <div className="container mx-auto flex h-20 items-center px-4 md:px-6">
         <Link href="/" className="mr-6 flex items-center">
           <Logo />
         </Link>
@@ -45,42 +44,44 @@ export function Header() {
               href={href}
               className={cn(
                 "transition-colors hover:text-primary",
-                pathname === href ? "text-primary font-semibold" : (isScrolled ? "text-foreground/70" : "text-white/80 hover:text-white")
+                pathname === href ? "text-primary font-semibold" : "text-foreground/70"
               )}
             >
               {label}
             </Link>
           ))}
         </nav>
-        <div className="ml-auto flex items-center gap-4 md:hidden">
+        <div className="ml-auto flex items-center gap-4">
+           <Button asChild size="sm" className="hidden md:flex">
+              <Link href="/contact">Book Now</Link>
+            </Button>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className={cn(isScrolled ? "" : "text-white border-white/50")}>
+              <Button variant="outline" size="icon" className="md:hidden">
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
-              <nav className="grid gap-6 text-lg font-medium">
-                <Link
-                  href="/"
-                  className="flex items-center gap-2 text-lg font-semibold"
-                >
-                  <Logo />
-                </Link>
-                {navLinks.map(({ href, label }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={cn(
-                      "transition-colors hover:text-primary",
-                      pathname === href ? "text-primary" : "text-muted-foreground"
-                    )}
-                  >
-                    {label}
+               <div className="p-4">
+                 <Link href="/" className="mb-8 block">
+                    <Logo />
                   </Link>
-                ))}
-              </nav>
+                  <nav className="grid gap-4 text-lg font-medium">
+                    {navLinks.map(({ href, label }) => (
+                      <Link
+                        key={href}
+                        href={href}
+                        className={cn(
+                          "transition-colors hover:text-primary",
+                          pathname === href ? "text-primary" : "text-muted-foreground"
+                        )}
+                      >
+                        {label}
+                      </Link>
+                    ))}
+                  </nav>
+               </div>
             </SheetContent>
           </Sheet>
         </div>
