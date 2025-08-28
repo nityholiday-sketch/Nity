@@ -29,12 +29,12 @@ export function WhatWeProvide() {
                     </div>
                      <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-4">
-                            <Image src="https://picsum.photos/400/300?random=21" alt="Comfortable hotel room" width={400} height={300} className="rounded-lg shadow-md" data-ai-hint="hotel room" />
-                            <Image src="https://picsum.photos/400/300?random=22" alt="Travel map and essentials" width={400} height={300} className="rounded-lg shadow-md" data-ai-hint="travel map" />
+                            <Image src="https://firebasestorage.googleapis.com/v0/b/nityholiday-adventures.firebasestorage.app/o/home%20(1).png?alt=media&token=ea6b7ae0-c60e-4e58-b653-3240f9ff8047" alt="Comfortable hotel room" width={400} height={300} className="rounded-lg shadow-md" data-ai-hint="hotel room" />
+                            <Image src="https://firebasestorage.googleapis.com/v0/b/nityholiday-adventures.firebasestorage.app/o/home%20(2).png?alt=media&token=c1ebd00f-1ee7-45da-a76b-fcd4476e4dd5" alt="Travel map and essentials" width={400} height={300} className="rounded-lg shadow-md" data-ai-hint="travel map" />
                         </div>
                         <div className="grid gap-4 mt-8">
-                            <Image src="https://picsum.photos/400/300?random=23" alt="Chef preparing a meal" width={400} height={300} className="rounded-lg shadow-md" data-ai-hint="chef cooking" />
-                            <Image src="https://picsum.photos/400/300?random=24" alt="Delicious Indian thali" width={400} height={300} className="rounded-lg shadow-md" data-ai-hint="indian food" />
+                            <Image src="https://firebasestorage.googleapis.com/v0/b/nityholiday-adventures.firebasestorage.app/o/home%20(3).png?alt=media&token=07c8b0a5-d9f4-446f-aea7-d79e57440c63" alt="Chef preparing a meal" width={400} height={300} className="rounded-lg shadow-md" data-ai-hint="chef cooking" />
+                            <Image src="https://firebasestorage.googleapis.com/v0/b/nityholiday-adventures.firebasestorage.app/o/home%20(4).png?alt=media&token=548f39a9-ef65-4345-9f63-5fcade075b12" alt="Delicious Indian thali" width={400} height={300} className="rounded-lg shadow-md" data-ai-hint="indian food" />
                         </div>
                     </div>
                 </div>
