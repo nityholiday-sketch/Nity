@@ -30,42 +30,24 @@ export default function AboutPage() {
                 />
             </div>
             <div className="space-y-4">
-                <h2 className="font-headline text-3xl font-bold">Who We Are</h2>
+                <h2 className="font-headline text-3xl font-bold">Our Story</h2>
                 <p className="text-muted-foreground">
-                    Nityholiday was born from a shared love for exploration and a desire to make travel accessible, authentic, and memorable for everyone. We are a team of seasoned travel experts, local guides, and passionate adventurers dedicated to curating journeys that go beyond the ordinary.
+                    Nity Holiday is a trusted name in affordable and premium travel experiences. Powered by NITYTRAVELTODREAM LLP, we specialize in creating personalized holiday plans to the most exciting destinations in the world—starting with the glamour and adventure of Dubai.
                 </p>
                 <p className="text-muted-foreground">
-                    We believe that travel is not just about visiting new places, but about creating lasting memories, forging new connections, and discovering yourself along the way.
+                    Founded with a passion for travel and a commitment to exceptional service, our team brings years of experience in the travel industry to every package we create. We understand that a vacation is more than just a trip—it's an experience that creates lasting memories.
                 </p>
             </div>
         </div>
 
-        <div className="mt-24 grid md:grid-cols-3 gap-8 text-center">
-          <div className="flex flex-col items-center space-y-3">
+        <div className="mt-24 text-center">
+          <div className="flex flex-col items-center space-y-3 max-w-3xl mx-auto">
             <div className="p-4 bg-secondary rounded-full">
               <Target className="h-8 w-8 text-primary" />
             </div>
             <h3 className="font-headline text-2xl font-semibold">Our Mission</h3>
             <p className="text-muted-foreground">
-              To provide exceptional, high-quality, and personalized travel services that exceed our clients' expectations and create unforgettable memories.
-            </p>
-          </div>
-          <div className="flex flex-col items-center space-y-3">
-            <div className="p-4 bg-secondary rounded-full">
-              <Globe className="h-8 w-8 text-primary" />
-            </div>
-            <h3 className="font-headline text-2xl font-semibold">Our Vision</h3>
-            <p className="text-muted-foreground">
-              To be the leading and most trusted travel agency known for our creativity, reliability, and commitment to sustainable tourism.
-            </p>
-          </div>
-          <div className="flex flex-col items-center space-y-3">
-            <div className="p-4 bg-secondary rounded-full">
-              <Users className="h-8 w-8 text-primary" />
-            </div>
-            <h3 className="font-headline text-2xl font-semibold">Our Team</h3>
-            <p className="text-muted-foreground">
-              Our team consists of experienced professionals who are passionate about travel and dedicated to ensuring every detail of your trip is perfect.
+              Our mission is to make luxury travel accessible to everyone by offering comprehensive packages that include everything you need for a perfect holiday. From visa processing to airport transfers, hotel accommodations to exciting sightseeing tours—we handle it all, so you can focus on enjoying your journey.
             </p>
           </div>
         </div>
