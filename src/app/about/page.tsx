@@ -22,12 +22,13 @@ export default function AboutPage() {
         </div>
         <div className="mt-12 grid md:grid-cols-2 gap-12 items-center">
             <div className="relative w-full h-80 rounded-lg overflow-hidden shadow-lg">
-                <Image 
-                    src="https://picsum.photos/800/600?random=10"
-                    alt="Team of Nityholiday"
-                    fill
-                    className="object-cover"
-                    data-ai-hint="happy people team"
+                <video
+                    src="https://firebasestorage.googleapis.com/v0/b/nityholiday-adventures.firebasestorage.app/o/about%20us%20video.mp4?alt=media&token=2827218a-03f8-44b4-8390-007920813df9"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="absolute top-1/2 left-1/2 w-full h-full min-w-full min-h-full object-cover transform -translate-x-1/2 -translate-y-1/2"
                 />
             </div>
             <div className="space-y-4">
