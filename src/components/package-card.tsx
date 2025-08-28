@@ -36,7 +36,7 @@ export function PackageCard({ pkg }: PackageCardProps) {
           </div>
           <div className="flex items-center gap-2 text-foreground">
             <Tag className="h-4 w-4 text-primary" />
-            <span className="font-bold">${pkg.price}</span>
+            <span className="font-bold">₹{pkg.price}</span>
           </div>
         </div>
       </CardContent>
