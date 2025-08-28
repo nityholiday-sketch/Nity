@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { packages } from "@/lib/data";
-import { Clock, DollarSign, Plane, Train, Bus, AlertCircle } from "lucide-react";
+import { Clock, DollarSign, Plane, Train, Bus, AlertCircle, CheckCircle, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -102,6 +102,31 @@ export default function PackageDetailsPage({ params }: Props) {
                  </AccordionItem>
               ))}
             </Accordion>
+            
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="font-headline text-xl font-bold mb-4">What's Included</h3>
+                <ul className="space-y-2">
+                  {pkg.inclusions.map((item, index) => (
+                    <li key={index} className="flex items-start">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-1 flex-shrink-0" />
+                      <span className="text-muted-foreground">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-headline text-xl font-bold mb-4">What's Excluded</h3>
+                 <ul className="space-y-2">
+                  {pkg.exclusions.map((item, index) => (
+                    <li key={index} className="flex items-start">
+                      <XCircle className="h-5 w-5 text-red-500 mr-2 mt-1 flex-shrink-0" />
+                      <span className="text-muted-foreground">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           </div>
 
           {/* Sidebar */}
