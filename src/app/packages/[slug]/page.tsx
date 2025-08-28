@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-const transportIcons = {
+const transportIcons: { [key: string]: React.ReactNode } = {
   Flight: <Plane className="h-5 w-5" />,
   Train: <Train className="h-5 w-5" />,
   Bus: <Bus className="h-5 w-5" />,
@@ -91,8 +91,8 @@ export default function PackageDetailsPage({ params }: Props) {
 
             <h2 className="font-headline text-2xl font-bold mt-8">Itinerary</h2>
             <Accordion type="single" collapsible className="w-full mt-4">
-              {pkg.itinerary.map((item) => (
-                 <AccordionItem value={`item-${item.day}`} key={item.day}>
+              {pkg.itinerary.map((item, index) => (
+                 <AccordionItem value={`item-${index}`} key={index}>
                    <AccordionTrigger>
                      <span className="font-semibold">Day {item.day}: {item.title}</span>
                    </AccordionTrigger>
