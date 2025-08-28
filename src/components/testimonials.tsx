@@ -12,7 +12,7 @@ const testimonials = [
     name: "Anika Mehta",
     location: "Mumbai, Maharashtra",
     avatar: "AM",
-    image: "https://picsum.photos/100/100?random=1",
+    image: "https://firebasestorage.googleapis.com/v0/b/nityholiday-adventures.firebasestorage.app/o/testi%20(1).png?alt=media&token=a1cb1e8c-2670-478d-bff5-2b8df8022515",
     quote:
       "An absolutely royal experience. The guide was incredibly knowledgeable and brought the history of Rajasthan to life. The sunset camel ride was unforgettable.",
   },
@@ -20,7 +20,7 @@ const testimonials = [
     name: "Alok Nath",
     location: "Varanasi, UP",
     avatar: "AN",
-    image: "https://picsum.photos/100/100?random=2",
+    image: "https://firebasestorage.googleapis.com/v0/b/nityholiday-adventures.firebasestorage.app/o/testi%20(2).png?alt=media&token=6d4ce699-c6d8-45dc-b63e-097e3cc45ddc",
     quote:
       "Train se Char Dham Yatra ka anubhav bohot hi shaandar tha. Sab kuch acche se organized tha hume bohot accha laga.",
   },
