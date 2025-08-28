@@ -1,37 +1,23 @@
 import React from 'react';
+import Image from 'next/image';
 
 export function Logo() {
   return (
-    <div className="flex items-center" title="NityHoliday Adventures">
+    <div className="flex items-center" title="KR Field Holiday">
       <svg
-        width="32"
-        height="32"
-        viewBox="0 0 24 24"
+        width="36"
+        height="36"
+        viewBox="0 0 48 48"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className="text-primary"
       >
-        <path
-          d="M12 2L2 7V17L12 22L22 17V7L12 2Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M2 7L12 12M22 7L12 12M12 22V12"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M17 4.5L7 9.5"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-        />
+        <path d="M48 24C48 37.2548 37.2548 48 24 48C10.7452 48 0 37.2548 0 24C0 10.7452 10.7452 0 24 0C37.2548 0 48 10.7452 48 24Z" fill="#00A991"/>
+        <path d="M24.246 10.68L18.498 19.344L14.4 15.246L6 24.18L13.158 31.338L16.29 27.888L21.858 31.758L30.93 18.006L24.246 10.68Z" fill="white" stroke="white" stroke-width="0.5"/>
+        <path d="M34.02 24.12L28.242 30L32.202 34.02L42 24.18L34.02 24.12Z" fill="white" stroke="white" stroke-width="0.5"/>
       </svg>
-      <span className="ml-2 font-headline text-xl font-bold text-primary">
-        NityHoliday
+      <span className="ml-2 font-headline text-xl font-bold">
+        KR Field Holiday
       </span>
     </div>
   );

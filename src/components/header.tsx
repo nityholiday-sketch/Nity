@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Mountain } from "lucide-react";
+import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -11,8 +11,9 @@ import { Logo } from "@/components/logo";
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/packages", label: "Tour Packages" },
-  { href: "/about", label: "About Us" },
+  { href: "/packages", label: "Packages" },
+  { href: "/blog", label: "Blog" },
+  { href: "/about", label: "Who We Are" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -44,7 +45,7 @@ export function Header() {
               href={href}
               className={cn(
                 "transition-colors hover:text-primary",
-                pathname === href ? "text-primary font-semibold" : "text-foreground/70"
+                pathname === href ? "text-primary font-semibold" : (isScrolled ? "text-foreground/70" : "text-white/80 hover:text-white")
               )}
             >
               {label}
@@ -54,7 +55,7 @@ export function Header() {
         <div className="ml-auto flex items-center gap-4 md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" className={cn(isScrolled ? "" : "text-white border-white/50")}>
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>

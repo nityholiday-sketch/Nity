@@ -1,87 +1,99 @@
 import {
   Carousel,
   CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+  CarouselItem
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Star } from "lucide-react";
 
 const testimonials = [
   {
-    name: "Sarah L.",
-    title: "Adventurer",
-    avatar: "SL",
+    name: "Anika Mehta",
+    location: "Mumbai, Maharashtra",
+    avatar: "AM",
     image: "https://picsum.photos/100/100?random=1",
     quote:
-      "The Himalayan Serenity trip was a life-changing experience. NityHoliday's team was professional, and everything was perfectly organized. I can't wait for my next adventure with them!",
+      "An absolutely royal experience. The guide was incredibly knowledgeable and brought the history of Rajasthan to life. The sunset camel ride was unforgettable.",
   },
   {
-    name: "John D.",
-    title: "Family Traveler",
-    avatar: "JD",
+    name: "Alok Nath",
+    location: "Varanasi, UP",
+    avatar: "AN",
     image: "https://picsum.photos/100/100?random=2",
     quote:
-      "Our Coastal Wonders vacation was fantastic. The kids loved the beaches, and the arrangements were seamless. Highly recommended for a hassle-free family holiday.",
+      "Train se Char Dham Yatra ka anubhav bohot hi shaandar tha. Sab kuch acche se organized tha hume bohot accha laga.",
   },
   {
-    name: "Emily R.",
-    title: "Solo Explorer",
-    avatar: "ER",
+    name: "Kavita Iyer",
+    location: "Chennai, Tamil Nadu",
+    avatar: "KI",
     image: "https://picsum.photos/100/100?random=3",
     quote:
-      "I did the Desert Odyssey tour, and it was magical. The camel safari under the stars is something I'll never forget. The guides were knowledgeable and friendly.",
+      "Gujarat has so much to offer! From the ancient temples of Dwarka and Somnath to the modern marvels of the Statue of Unity. A very diverse and amazing experience.",
+  },
+    {
+    name: "Sneha Agarwal",
+    location: "Gurgaon, Haryana",
+    avatar: "SA",
+    image: "https://picsum.photos/100/100?random=4",
+    quote:
+      "The Auli and Mussoorie trip was a fantastic winter getaway. The arrangements were top-notch and our guide was very friendly and helpful.",
+  },
+  {
+    name: "Sahil Kumar",
+    location: "Mumbai, Maharashtra",
+    avatar: "SK",
+    image: "https://picsum.photos/100/100?random=5",
+    quote:
+        "Rajasthan ka trip ek dum royal tha! Hawa mahal aur desert camp... sab kuch awesome. Paisa wasool!",
+  },
+  {
+    name: "Naval Kumar",
+    location: "Lucknow, Uttar Pradesh",
+    avatar: "NK",
+    image: "https://picsum.photos/100/100?random=6",
+    quote:
+        "The bus journey for the Char Dham Yatra was comfortable and scenic. The driver and guide were very professional and helpful throughout the trip. Great value for money!",
   },
 ];
 
 export function Testimonials() {
   return (
-    <section className="py-12 md:py-24">
+    <section className="bg-white py-12 md:py-24">
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center">
           <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">
-            What Our Travelers Say
+            What Our Adventurers Say
           </h2>
           <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-            Stories from those who've journeyed with us.
+            Real stories from real travellers. See why our adventurers trust us with their dream vacations.
           </p>
         </div>
-        <Carousel
-          opts={{
-            align: "start",
-            loop: true,
-          }}
-          className="w-full max-w-4xl mx-auto mt-10"
-        >
-          <CarouselContent>
+        <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                <div className="p-1">
-                  <Card>
-                    <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                      <p className="text-muted-foreground italic">
-                        "{testimonial.quote}"
-                      </p>
-                      <div className="mt-4 flex items-center">
-                        <Avatar className="h-12 w-12">
-                          <AvatarImage src={testimonial.image} alt={testimonial.name} data-ai-hint="person face" />
-                          <AvatarFallback>{testimonial.avatar}</AvatarFallback>
-                        </Avatar>
-                        <div className="ml-4 text-left">
-                          <p className="font-semibold font-headline">{testimonial.name}</p>
-                          <p className="text-sm text-muted-foreground">{testimonial.title}</p>
+                <Card key={index} className="border-border/50 shadow-sm">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-center mb-4">
+                            <Avatar className="h-16 w-16 border-2 border-primary/50 p-1">
+                                <AvatarImage src={testimonial.image} alt={testimonial.name} data-ai-hint="person face" />
+                                <AvatarFallback>{testimonial.avatar}</AvatarFallback>
+                            </Avatar>
                         </div>
-                      </div>
+                        <p className="text-muted-foreground italic text-center mb-4">
+                            "{testimonial.quote}"
+                        </p>
+                        <div className="flex justify-center text-yellow-500 mb-2">
+                            {[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 fill-current" />)}
+                        </div>
+                        <div className="text-center">
+                            <p className="font-semibold font-headline">{testimonial.name}</p>
+                            <p className="text-sm text-muted-foreground">{testimonial.location}</p>
+                        </div>
                     </CardContent>
-                  </Card>
-                </div>
-              </CarouselItem>
+                </Card>
             ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
+        </div>
       </div>
     </section>
   );

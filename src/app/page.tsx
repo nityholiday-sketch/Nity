@@ -1,17 +1,18 @@
 import { Hero } from "@/components/hero";
-import { WhyChooseUs } from "@/components/why-choose-us";
+import { WhyTravelWithUs } from "@/components/why-travel-with-us";
 import { FeaturedPackages } from "@/components/featured-packages";
 import { Testimonials } from "@/components/testimonials";
-import AITravelTips from "@/components/ai-travel-tips";
+import { WhatWeProvide } from "@/components/what-we-provide";
+
 
 export default function Home() {
   return (
     <>
       <Hero />
-      <WhyChooseUs />
       <FeaturedPackages />
+      <WhatWeProvide />
       <Testimonials />
-      <AITravelTips />
+      <WhyTravelWithUs />
     </>
   );
 }
