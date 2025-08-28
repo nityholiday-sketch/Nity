@@ -8,8 +8,8 @@ export function Footer() {
   return (
     <footer className="bg-secondary text-secondary-foreground">
       <div className="container mx-auto px-4 py-8 md:px-6">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-5">
+          <div className="space-y-4 md:col-span-2">
             <Link href="/">
               <Logo />
             </Link>
@@ -39,23 +39,20 @@ export function Footer() {
           </div>
 
           <div>
+            <h3 className="font-headline font-semibold">Legal</h3>
+            <ul className="mt-4 space-y-2 text-sm">
+              <li><Link href="/privacy-policy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms-of-service" className="text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link></li>
+            </ul>
+          </div>
+
+          <div>
             <h3 className="font-headline font-semibold">Contact us</h3>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                 <li>nity.holiday@gmail.com</li>
                 <li>Ajmeri Gate Extension, AGC R, Ansari Road - 110002</li>
                 <li>+91 81605 49415</li>
             </ul>
-          </div>
-          
-          <div>
-            <h3 className="font-headline font-semibold">Newsletter</h3>
-             <p className="mt-4 text-sm text-muted-foreground">
-                Sign up for our newsletter to get the latest deals.
-            </p>
-            <form className="mt-4 flex gap-2">
-                <Input type="email" placeholder="Your email" className="bg-background"/>
-                <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">Subscribe</Button>
-            </form>
           </div>
         </div>
         <div className="mt-8 border-t border-border pt-4 text-center text-sm text-muted-foreground">
