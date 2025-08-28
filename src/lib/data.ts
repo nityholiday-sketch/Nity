@@ -1,0 +1,161 @@
+export type Package = {
+  id: string;
+  slug: string;
+  name: string;
+  image: string;
+  description: string;
+  price: number;
+  duration: string;
+  transport: ('Train' | 'Flight' | 'Heli' | 'Bus')[];
+  featured: boolean;
+  itinerary: { day: number; title: string; description: string }[];
+};
+
+export const packages: Package[] = [
+  {
+    id: "1",
+    slug: "himalayan-serenity",
+    name: "Himalayan Serenity",
+    image: "https://picsum.photos/600/400?random=1",
+    description: "Experience the tranquil beauty of the Himalayas. A journey of peace and breathtaking views.",
+    price: 1200,
+    duration: "7 Days",
+    transport: ["Flight", "Bus"],
+    featured: true,
+    itinerary: [
+      { day: 1, title: "Arrival in Kathmandu", description: "Transfer to hotel and briefing." },
+      { day: 2, title: "Kathmandu Sightseeing", description: "Visit Pashupatinath, Boudhanath, and Swayambhunath." },
+      { day: 3, title: "Flight to Lukla & Trek to Phakding", description: "An exciting flight and the start of our trek." },
+      { day: 4, title: "Trek to Namche Bazaar", description: "Enter the heart of the Everest region." },
+      { day: 5, title: "Acclimatization Day", description: "Hike to Everest View Hotel for stunning panoramas." },
+      { day: 6, title: "Trek back to Lukla", description: "Descend through beautiful Sherpa villages." },
+      { day: 7, title: "Flight to Kathmandu & Departure", description: "Fly back and transfer for your flight home." },
+    ],
+  },
+  {
+    id: "2",
+    slug: "coastal-wonders",
+    name: "Coastal Wonders",
+    image: "https://picsum.photos/600/400?random=2",
+    description: "Explore sunny beaches, vibrant coral reefs, and charming coastal towns.",
+    price: 950,
+    duration: "5 Days",
+    transport: ["Flight", "Train"],
+    featured: true,
+    itinerary: [
+      { day: 1, title: "Arrival in Goa", description: "Check into your beachside resort." },
+      { day: 2, title: "North Goa Exploration", description: "Visit Calangute, Baga, and Anjuna beaches." },
+      { day: 3, title: "South Goa Serenity", description: "Discover the tranquility of Palolem and Colva beaches." },
+      { day: 4, title: "Watersports & Leisure", description: "Enjoy a day of adventure or relax by the sea." },
+      { day: 5, title: "Departure", description: "Transfer to the airport for your journey back." },
+    ],
+  },
+  {
+    id: "3",
+    slug: "jungle-expedition",
+    name: "Jungle Expedition",
+    image: "https://picsum.photos/600/400?random=3",
+    description: "A thrilling adventure deep into the heart of the Amazon rainforest.",
+    price: 1800,
+    duration: "10 Days",
+    transport: ["Flight", "Heli"],
+    featured: true,
+    itinerary: [
+      { day: 1, title: "Arrival in Manaus", description: "Gateway to the Amazon." },
+      { day: 2-4, title: "Deep Jungle Lodge", description: "Travel by boat to a remote lodge, daily excursions." },
+      { day: 5, title: "Meet Local Communities", description: "Learn about indigenous cultures." },
+      { day: 6-8, title: "Wildlife Spotting", description: "Piranha fishing, night safaris, and bird watching." },
+      { day: 9, title: "Return to Manaus", description: "Visit the Meeting of Waters." },
+      { day: 10, title: "Departure", description: "Fly out from Manaus." },
+    ],
+  },
+  {
+    id: "4",
+    slug: "desert-odyssey",
+    name: "Desert Odyssey",
+    image: "https://picsum.photos/600/400?random=4",
+    description: "Discover the magic of the Thar Desert with camel safaris and starlit nights.",
+    price: 750,
+    duration: "4 Days",
+    transport: ["Train", "Bus"],
+    featured: true,
+    itinerary: [
+      { day: 1, title: "Arrival in Jaisalmer", description: "The Golden City." },
+      { day: 2, title: "Jaisalmer Fort & City Tour", description: "Explore the living fort and Havelis." },
+      { day: 3, title: "Camel Safari & Desert Camp", description: "Ride into the dunes and enjoy a cultural evening." },
+      { day: 4, title: "Departure", description: "Morning transfer for your onward journey." },
+    ],
+  },
+  {
+    id: "5",
+    slug: "ancient-ruins-tour",
+    name: "Ancient Ruins Tour",
+    image: "https://picsum.photos/600/400?random=5",
+    description: "Step back in time as you explore the majestic ruins of a lost civilization.",
+    price: 1500,
+    duration: "8 Days",
+    transport: ["Flight", "Bus"],
+    featured: false,
+    itinerary: [
+      { day: 1, title: "Arrival in Rome", description: "The Eternal City awaits." },
+      { day: 2, title: "Ancient Rome", description: "Visit the Colosseum, Roman Forum, and Palatine Hill." },
+      { day: 3, title: "Vatican City", description: "Explore St. Peter's Basilica and the Vatican Museums." },
+      { day: 4, title: "Journey to Pompeii", description: "Discover the city frozen in time." },
+      { day: 5, title: "Amalfi Coast", description: "Enjoy the stunning coastal views of Positano." },
+      { day: 6, title: "Explore Capri", description: "Take a boat tour to the beautiful island of Capri." },
+      { day: 7, title: "Return to Rome", description: "A final evening in the capital." },
+      { day: 8, title: "Departure", description: "Transfer to the airport." },
+    ],
+  },
+  {
+    id: "6",
+    slug: "northern-lights-quest",
+    name: "Northern Lights Quest",
+    image: "https://picsum.photos/600/400?random=6",
+    description: "Chase the aurora borealis in the stunning landscapes of Iceland.",
+    price: 2200,
+    duration: "6 Days",
+    transport: ["Flight", "Heli"],
+    featured: true,
+    itinerary: [
+      { day: 1, title: "Arrival in Reykjavik", description: "Settle in and explore the city." },
+      { day: 2, title: "Golden Circle Tour", description: "See Gullfoss, Geysir, and Þingvellir National Park." },
+      { day: 3, title: "South Coast Adventure", description: "Waterfalls, black sand beaches, and glaciers." },
+      { day: 4, title: "Blue Lagoon & Aurora Hunt", description: "Relax in the geothermal spa and hunt for the Northern Lights." },
+      { day: 5, title: "Ice Caving", description: "Explore a natural ice cave (seasonal)." },
+      { day: 6, title: "Departure", description: "Fly home from Keflavik." },
+    ],
+  },
+  {
+    id: "7",
+    slug: "city-of-lakes-escape",
+    name: "City of Lakes Escape",
+    image: "https://picsum.photos/600/400?random=7",
+    description: "Experience the romance and royalty of Udaipur, the Venice of the East.",
+    price: 600,
+    duration: "3 Days",
+    transport: ["Train", "Bus"],
+    featured: false,
+    itinerary: [
+      { day: 1, title: "Arrival in Udaipur", description: "Check into your hotel with lake views." },
+      { day: 2, title: "City Palace & Boat Ride", description: "Explore the grand palace and take a boat ride on Lake Pichola." },
+      { day: 3, title: "Departure", description: "Visit Saheliyon-ki-Bari before heading to the airport/station." },
+    ],
+  },
+  {
+    id: "8",
+    slug: "spiritual-ganges-tour",
+    name: "Spiritual Ganges Tour",
+    image: "https://picsum.photos/600/400?random=8",
+    description: "A journey of spiritual discovery along the holy river Ganges in Varanasi.",
+    price: 500,
+    duration: "3 Days",
+    transport: ["Flight", "Train"],
+    featured: true,
+    itinerary: [
+      { day: 1, title: "Arrival in Varanasi", description: "Evening Ganga Aarti ceremony." },
+      { day: 2, title: "Sunrise Boat Tour & Sarnath", description: "Morning boat ride on the Ganges and a trip to Sarnath." },
+      { day: 3, title: "Departure", description: "Explore the old city before departing." },
+    ],
+  },
+];
