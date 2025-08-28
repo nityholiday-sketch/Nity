@@ -29,7 +29,7 @@ export function Hero() {
             Your Adventure Awaits
           </h1>
           <p className="mx-auto mt-4 max-w-3xl text-lg text-neutral-200 md:text-xl">
-            Discover unforgettable travel experiences with KR Field Holiday.
+            Discover unforgettable travel experiences with Nityholiday.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">

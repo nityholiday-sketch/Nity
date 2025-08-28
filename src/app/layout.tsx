@@ -5,8 +5,8 @@ import { Footer } from '@/components/footer';
 import FloatingWhatsapp from '@/components/floating-whatsapp';
 import './globals.css';
 
-const APP_NAME = "NityHoliday Adventures";
-const APP_DESCRIPTION = "Explore the world with NityHoliday Adventures. We offer personalized tour packages, verified services, and competitive pricing for an unforgettable travel experience.";
+const APP_NAME = "Nityholiday";
+const APP_DESCRIPTION = "Explore the world with Nityholiday. We offer personalized tour packages, verified services, and competitive pricing for an unforgettable travel experience.";
 const APP_URL = "https://nityholiday.com"; // Replace with your actual domain
 
 export const metadata: Metadata = {
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
       url: `${APP_URL}/og-image.jpg`, // Replace with your actual OG image URL
       width: 1200,
       height: 630,
-      alt: "NityHoliday Adventures - Your Gateway to Unforgettable Journeys",
+      alt: "Nityholiday - Your Gateway to Unforgettable Journeys",
     }],
   },
   twitter: {

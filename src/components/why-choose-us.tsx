@@ -25,7 +25,7 @@ export function WhyChooseUs() {
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center">
           <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">
-            Why Choose NityHoliday?
+            Why Choose Nityholiday?
           </h2>
           <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
             We are dedicated to making your travel dreams a reality with our commitment to quality and service.

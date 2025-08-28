@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 export function Logo() {
   return (
-    <div className="flex items-center" title="KR Field Holiday">
+    <div className="flex items-center" title="Nityholiday">
       <svg
         width="36"
         height="36"
@@ -17,7 +17,7 @@ export function Logo() {
         <path d="M34.02 24.12L28.242 30L32.202 34.02L42 24.18L34.02 24.12Z" fill="white" stroke="white" strokeWidth="0.5"/>
       </svg>
       <span className="ml-2 font-headline text-xl font-bold">
-        KR Field Holiday
+        Nityholiday
       </span>
     </div>
   );

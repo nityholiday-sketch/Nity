@@ -4,7 +4,7 @@ import { Mail, Phone, MapPin } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Contact Us",
-  description: "Get in touch with NityHoliday Adventures. We're here to help you plan your next adventure.",
+  description: "Get in touch with Nityholiday. We're here to help you plan your next adventure.",
 };
 
 export default function ContactPage() {

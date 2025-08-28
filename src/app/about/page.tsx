@@ -4,7 +4,7 @@ import { Globe, Users, Target } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "About Us",
-  description: "Learn about NityHoliday Adventures, our mission, our vision, and the team dedicated to crafting your perfect journey.",
+  description: "Learn about Nityholiday, our mission, our vision, and the team dedicated to crafting your perfect journey.",
 };
 
 export default function AboutPage() {
@@ -13,7 +13,7 @@ export default function AboutPage() {
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center">
           <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl">
-            About NityHoliday Adventures
+            About Nityholiday
           </h1>
           <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
             Crafting unforgettable travel experiences with passion and expertise.
@@ -23,7 +23,7 @@ export default function AboutPage() {
             <div className="relative w-full h-80 rounded-lg overflow-hidden shadow-lg">
                 <Image 
                     src="https://picsum.photos/800/600?random=10"
-                    alt="Team of NityHoliday Adventures"
+                    alt="Team of Nityholiday"
                     fill
                     className="object-cover"
                     data-ai-hint="happy people team"
@@ -32,7 +32,7 @@ export default function AboutPage() {
             <div className="space-y-4">
                 <h2 className="font-headline text-3xl font-bold">Who We Are</h2>
                 <p className="text-muted-foreground">
-                    NityHoliday Adventures was born from a shared love for exploration and a desire to make travel accessible, authentic, and memorable for everyone. We are a team of seasoned travel experts, local guides, and passionate adventurers dedicated to curating journeys that go beyond the ordinary.
+                    Nityholiday was born from a shared love for exploration and a desire to make travel accessible, authentic, and memorable for everyone. We are a team of seasoned travel experts, local guides, and passionate adventurers dedicated to curating journeys that go beyond the ordinary.
                 </p>
                 <p className="text-muted-foreground">
                     We believe that travel is not just about visiting new places, but about creating lasting memories, forging new connections, and discovering yourself along the way.
