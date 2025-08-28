@@ -15,31 +15,23 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { contactAction } from "@/app/actions";
 
-const FormSchema = z.object({
+const ContactFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   email: z.string().email("Please enter a valid email."),
   subject: z.string().min(5, "Subject must be at least 5 characters."),
   message: z.string().min(10, "Message must be at least 10 characters."),
 });
 
-async function contactAction(data: z.infer<typeof FormSchema>) {
-  "use server";
-  // Here you would typically send an email or store the inquiry in a database.
-  console.log("New contact inquiry:", data);
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  return { success: true };
-}
-
 
 export function ContactForm() {
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
+  const form = useForm<z.infer<typeof ContactFormSchema>>({
+    resolver: zodResolver(ContactFormSchema),
     defaultValues: { name: "", email: "", subject: "", message: "" },
   });
 
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function onSubmit(data: z.infer<typeof ContactFormSchema>) {
     const result = await contactAction(data);
     if (result.success) {
       toast({
