@@ -41,8 +41,9 @@ export function Footer() {
           <div>
             <h3 className="font-headline font-semibold">Contact us</h3>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-                <li>info@krfieldholiday.com</li>
-                <li>Raikhad, Ahmedabad, Gujarat</li>
+                <li>nity.holiday@gmail.com</li>
+                <li>Ajmeri Gate Extension, AGC R, Ansari Road - 110002</li>
+                <li>+91 81605 49415</li>
             </ul>
           </div>
           
@@ -58,7 +59,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-8 border-t border-border pt-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} KR Field Holiday. All Rights Reserved.</p>
+          <p>&copy; {new Date().getFullYear()} NITYTRAVELTODREAM LLP. All Rights Reserved.</p>
         </div>
       </div>
     </footer>

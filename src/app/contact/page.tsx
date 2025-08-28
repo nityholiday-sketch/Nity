@@ -33,21 +33,21 @@ export default function ContactPage() {
                   <MapPin className="h-6 w-6 mr-4 text-primary mt-1" />
                   <div>
                     <span className="font-semibold text-foreground">Address:</span><br/>
-                    123 Adventure Lane, Travel City, World 12345
+                    Ajmeri Gate Extension, AGC R, Ansari Road - 110002
                   </div>
                 </li>
                 <li className="flex items-center">
                   <Mail className="h-6 w-6 mr-4 text-primary" />
                   <div>
                     <span className="font-semibold text-foreground">Email:</span>
-                    <a href="mailto:contact@nityholiday.com" className="block hover:text-primary">contact@nityholiday.com</a>
+                    <a href="mailto:nity.holiday@gmail.com" className="block hover:text-primary">nity.holiday@gmail.com</a>
                   </div>
                 </li>
                 <li className="flex items-center">
                   <Phone className="h-6 w-6 mr-4 text-primary" />
                   <div>
                      <span className="font-semibold text-foreground">Phone:</span>
-                    <a href="tel:+1234567890" className="block hover:text-primary">+1 (234) 567-890</a>
+                    <a href="tel:+918160549415" className="block hover:text-primary">+91 81605 49415</a>
                   </div>
                 </li>
               </ul>
