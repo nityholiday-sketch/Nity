@@ -1,3 +1,6 @@
+
+"use client";
+
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
@@ -9,16 +12,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import React, { useState } from "react";
 
 type Props = {
   params: { slug: string };
@@ -32,6 +34,9 @@ export async function generateStaticParams() {
 }
 
 // Generate metadata for each package page
+// Note: We can't generate dynamic metadata in a client component.
+// This should be moved to a parent server component or handled differently if metadata needs to be dynamic.
+/*
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const pkg = packages.find((p) => p.slug === params.slug);
 
@@ -49,7 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: pkg.description,
       images: [
         {
-          url: pkg.image, // Using placeholder for now
+          url: pkg.image,
           width: 600,
           height: 400,
           alt: pkg.name,
@@ -58,6 +63,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
   };
 }
+*/
 
 const transportIcons: { [key: string]: React.ReactNode } = {
   Flight: <Plane className="h-5 w-5" />,
@@ -67,11 +73,16 @@ const transportIcons: { [key: string]: React.ReactNode } = {
 };
 
 export default function PackageDetailsPage({ params }: Props) {
+  const [paymentOption, setPaymentOption] = useState("full");
+  const [customAmount, setCustomAmount] = useState("");
+
   const pkg = packages.find((p) => p.slug === params.slug);
 
   if (!pkg) {
     notFound();
   }
+
+  const amountToPay = paymentOption === 'full' ? pkg.price : Number(customAmount);
 
   return (
     <div className="py-12">
@@ -149,7 +160,7 @@ export default function PackageDetailsPage({ params }: Props) {
               <CardContent className="space-y-4">
                 <div className="flex items-center">
                   <span className="font-bold text-xl mr-1">₹</span>
-                  <span className="font-bold text-xl">{pkg.price}</span>
+                  <span className="font-bold text-xl">{pkg.price.toLocaleString()}</span>
                   <span className="text-muted-foreground ml-1">/ person</span>
                 </div>
                 <div className="flex items-center">
@@ -177,60 +188,62 @@ export default function PackageDetailsPage({ params }: Props) {
                     <CardTitle className="font-headline">Book This Tour</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <form className="space-y-4">
-                        <div>
-                            <Label htmlFor="name">Full Name</Label>
-                            <Input id="name" placeholder="John Doe" />
+                  <Dialog>
+                    <DialogTrigger asChild>
+                       <Button className="w-full">
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        Book Now
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[480px]">
+                      <DialogHeader>
+                        <DialogTitle className="text-2xl font-bold text-center">Complete Your Booking</DialogTitle>
+                      </DialogHeader>
+                      <div className="mt-4">
+                        <div className="flex items-center gap-4">
+                           <Image src={pkg.image} alt={pkg.name} width={120} height={80} className="rounded-md object-cover" data-ai-hint="travel landscape"/>
+                           <div>
+                              <h3 className="font-semibold text-lg">{pkg.name}</h3>
+                              <p className="text-sm text-muted-foreground">{pkg.duration}</p>
+                              <p className="font-bold text-lg mt-1">₹{pkg.price.toLocaleString()}</p>
+                           </div>
                         </div>
-                        <div>
-                            <Label htmlFor="email">Email</Label>
-                            <Input id="email" type="email" placeholder="you@example.com" />
-                        </div>
-                        <div>
-                            <Label htmlFor="travelers">Number of Travelers</Label>
-                            <Input id="travelers" type="number" min="1" defaultValue="1" />
-                        </div>
-                        
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button className="w-full">
-                              <CreditCard className="mr-2 h-4 w-4" />
-                              Proceed to Payment
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Choose Your Payment Option</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                You can choose to pay the full amount now or make a custom advance payment to secure your booking.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                               <Button variant="outline" className="h-auto">
-                                  <div className="flex flex-col items-center p-4">
-                                    <Landmark className="h-8 w-8 mb-2" />
-                                    <p className="font-semibold">Full Payment</p>
-                                    <p className="text-sm text-muted-foreground">Pay the entire amount now</p>
-                                  </div>
-                                </Button>
-                               <Button variant="outline" className="h-auto">
-                                  <div className="flex flex-col items-center p-4">
-                                     <DollarSign className="h-8 w-8 mb-2" />
-                                     <p className="font-semibold">Custom Payment</p>
-                                     <p className="text-sm text-muted-foreground">Pay an advance amount</p>
-                                  </div>
-                                </Button>
-                            </div>
-                            <AlertDialogFooter className="mt-4">
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
 
-                         <p className="text-xs text-center text-muted-foreground">
-                            Our team will contact you to confirm the booking after payment.
-                         </p>
-                    </form>
+                        <RadioGroup value={paymentOption} onValueChange={setPaymentOption} className="mt-6 space-y-3">
+                          <Label className="flex items-center gap-3 rounded-lg border p-4 cursor-pointer hover:bg-accent has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
+                            <RadioGroupItem value="full" id="full_payment" />
+                            Pay Full Amount: ₹{pkg.price.toLocaleString()}
+                          </Label>
+                          <Label className="flex items-center gap-3 rounded-lg border p-4 cursor-pointer hover:bg-accent has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
+                             <RadioGroupItem value="custom" id="custom_payment" />
+                            Pay a Custom Amount
+                          </Label>
+                        </RadioGroup>
+
+                        {paymentOption === 'custom' && (
+                          <div className="mt-4">
+                            <Label htmlFor="custom-amount">Enter Amount</Label>
+                            <Input
+                              id="custom-amount"
+                              type="number"
+                              placeholder="Enter advance amount"
+                              value={customAmount}
+                              onChange={(e) => setCustomAmount(e.target.value)}
+                              className="mt-1"
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <div className="mt-6">
+                        <Button className="w-full h-12 text-lg" style={{backgroundColor: '#16a085'}}>
+                           Pay Now: ₹{amountToPay > 0 ? amountToPay.toLocaleString() : ''}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <p className="text-xs text-center text-muted-foreground mt-4">
+                      Our team will contact you to confirm the booking after payment.
+                  </p>
                 </CardContent>
              </Card>
           </div>
