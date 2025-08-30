@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { generatePersonalizedTravelTips } from "@/ai/flows/personalized-travel-tips";
 import { ContactFormSchema } from "@/components/contact-form";
+import { encrypt } from "@/lib/sabpaisa";
 
 // Define the schema for the AI tips form input
 const TravelTipsSchema = z.object({
@@ -29,4 +30,54 @@ export async function contactAction(data: z.infer<typeof ContactFormSchema>) {
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 1000));
   return { success: true };
+}
+
+const PaymentInitiationSchema = z.object({
+  amount: z.number(),
+  payerName: z.string().default("Nityholiday Customer"),
+  payerEmail: z.string().email().default("customer@nityholiday.com"),
+  payerMobile: z.string().default("9999999999"),
+});
+
+export async function initiatePaymentAction(values: z.infer<typeof PaymentInitiationSchema>) {
+    const clientCode = process.env.SABPAISA_CLIENT_CODE!;
+    const transUserName = process.env.SABPAISA_USERNAME!;
+    const transUserPassword = process.env.SABPAISA_PASSWORD!;
+    const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/payment-callback`;
+    const channelId = "W";
+    const mcc = process.env.SABPAISA_MCC!;
+    const spURL = process.env.SABPAISA_URL!;
+
+    const clientTxnId = `NITY-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+    const now = new Date();
+    const pad = (n: number) => (n < 10 ? '0' + n : n);
+    const transDate =
+        now.getFullYear() + '-' +
+        pad(now.getMonth() + 1) + '-' +
+        pad(now.getDate()) + ' ' +
+        pad(now.getHours()) + ':' +
+        pad(now.getMinutes()) + ':' +
+        pad(now.getSeconds());
+
+    const requestString = `payerName=${values.payerName}&payerEmail=${values.payerEmail}&payerMobile=${values.payerMobile}&clientTxnId=${clientTxnId}&amount=${values.amount}&clientCode=${clientCode}&transUserName=${transUserName}&transUserPassword=${transUserPassword}&callbackUrl=${callbackUrl}&channelId=${channelId}&mcc=${mcc}&transDate=${transDate}`;
+
+    console.log("Plaintext request string:", requestString);
+
+    try {
+        const encData = encrypt(requestString);
+
+        return {
+            success: true,
+            data: {
+                encData,
+                clientCode,
+                spURL
+            }
+        };
+
+    } catch (error) {
+        console.error("Payment Initiation Error:", error);
+        return { success: false, error: "Failed to initiate payment." };
+    }
 }

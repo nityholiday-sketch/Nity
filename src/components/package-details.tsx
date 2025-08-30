@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { Clock, Plane, Train, Bus, AlertCircle, CheckCircle, XCircle, CreditCard } from "lucide-react";
+import { Clock, Plane, Train, Bus, AlertCircle, CheckCircle, XCircle, CreditCard, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import type { Package } from "@/lib/data";
+import { initiatePaymentAction } from "@/app/actions";
+import { useToast } from "@/hooks/use-toast";
 
 const transportIcons: { [key: string]: React.ReactNode } = {
   Flight: <Plane className="h-5 w-5" />,
@@ -32,10 +34,63 @@ interface PackageDetailsClientProps {
 export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
   const [paymentOption, setPaymentOption] = useState("full");
   const [customAmount, setCustomAmount] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
+  const formRef = useRef<HTMLFormElement>(null);
+  const [paymentData, setPaymentData] = useState<{encData: string, clientCode: string, spURL: string} | null>(null);
 
   const amountToPay = paymentOption === 'full' ? pkg.price : Number(customAmount);
 
+  useEffect(() => {
+    if (paymentData) {
+      formRef.current?.submit();
+    }
+  }, [paymentData]);
+
+  async function handlePayment() {
+    if (paymentOption === 'custom' && (amountToPay <= 0 || customAmount === '')) {
+        toast({
+            title: "Invalid Amount",
+            description: "Please enter a valid custom payment amount.",
+            variant: "destructive",
+        });
+        return;
+    }
+    
+    setIsProcessing(true);
+    try {
+        const result = await initiatePaymentAction({
+            amount: amountToPay,
+            // You can add real customer details here in the future
+            payerName: "Test Customer",
+            payerEmail: "test@example.com",
+            payerMobile: "9876543210"
+        });
+
+        if (result.success && result.data) {
+            setPaymentData(result.data);
+        } else {
+            toast({
+                title: "Payment Error",
+                description: result.error || "Could not initiate payment.",
+                variant: "destructive",
+            });
+            setIsProcessing(false);
+        }
+
+    } catch (error) {
+        console.error(error);
+        toast({
+            title: "An Unexpected Error Occurred",
+            description: "Please try again later.",
+            variant: "destructive",
+        });
+        setIsProcessing(false);
+    }
+  }
+
   return (
+    <>
     <div className="py-12">
       <div className="container mx-auto px-4 md:px-6">
         {/* Header Section */}
@@ -186,8 +241,9 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                         )}
                       </div>
                       <div className="mt-6">
-                        <Button className="w-full h-12 text-lg">
-                           Pay Now: ₹{amountToPay > 0 ? amountToPay.toLocaleString() : ''}
+                        <Button className="w-full h-12 text-lg" onClick={handlePayment} disabled={isProcessing}>
+                           {isProcessing ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : null}
+                           {isProcessing ? 'Processing...' : `Pay Now: ₹${amountToPay > 0 ? amountToPay.toLocaleString() : ''}`}
                         </Button>
                       </div>
                     </DialogContent>
@@ -201,5 +257,12 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
         </div>
       </div>
     </div>
+    {paymentData && (
+        <form ref={formRef} action={paymentData.spURL} method="POST" style={{ display: 'none' }}>
+            <input type="hidden" name="encData" value={paymentData.encData} />
+            <input type="hidden" name="clientCode" value={paymentData.clientCode} />
+        </form>
+    )}
+    </>
   );
 }
