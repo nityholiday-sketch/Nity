@@ -4,8 +4,9 @@ import { URLSearchParams } from 'url';
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
-    const encResponse = formData.get('encResponse');
+    const bodyText = await req.text();
+    const encResponse = new URLSearchParams(bodyText).get('encResponse');
+
 
     if (typeof encResponse !== 'string') {
       return NextResponse.json({ error: 'Invalid response from payment gateway' }, { status: 400 });
