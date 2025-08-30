@@ -2,12 +2,23 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { packages } from "@/lib/data";
-import { Clock, DollarSign, Plane, Train, Bus, AlertCircle, CheckCircle, XCircle } from "lucide-react";
+import { Clock, DollarSign, Plane, Train, Bus, AlertCircle, CheckCircle, XCircle, CreditCard, Landmark } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type Props = {
   params: { slug: string };
@@ -179,9 +190,45 @@ export default function PackageDetailsPage({ params }: Props) {
                             <Label htmlFor="travelers">Number of Travelers</Label>
                             <Input id="travelers" type="number" min="1" defaultValue="1" />
                         </div>
-                         <Button className="w-full">Send Inquiry</Button>
+                        
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button className="w-full">
+                              <CreditCard className="mr-2 h-4 w-4" />
+                              Proceed to Payment
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Choose Your Payment Option</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                You can choose to pay the full amount now or make a custom advance payment to secure your booking.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                               <Button variant="outline" className="h-auto">
+                                  <div className="flex flex-col items-center p-4">
+                                    <Landmark className="h-8 w-8 mb-2" />
+                                    <p className="font-semibold">Full Payment</p>
+                                    <p className="text-sm text-muted-foreground">Pay the entire amount now</p>
+                                  </div>
+                                </Button>
+                               <Button variant="outline" className="h-auto">
+                                  <div className="flex flex-col items-center p-4">
+                                     <DollarSign className="h-8 w-8 mb-2" />
+                                     <p className="font-semibold">Custom Payment</p>
+                                     <p className="text-sm text-muted-foreground">Pay an advance amount</p>
+                                  </div>
+                                </Button>
+                            </div>
+                            <AlertDialogFooter className="mt-4">
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+
                          <p className="text-xs text-center text-muted-foreground">
-                            This will send an inquiry. Our team will contact you to confirm the booking.
+                            Our team will contact you to confirm the booking after payment.
                          </p>
                     </form>
                 </CardContent>
