@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import React from 'react';
+import React, { Suspense } from 'react';
 
-export default function PaymentStatusPage() {
+function PaymentStatus() {
   const searchParams = useSearchParams();
   const status = searchParams.get('status');
   const txnId = searchParams.get('txnId');
@@ -69,4 +69,12 @@ export default function PaymentStatusPage() {
       </Card>
     </div>
   );
+}
+
+export default function PaymentStatusPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <PaymentStatus />
+        </Suspense>
+    )
 }
