@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
@@ -19,6 +20,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import type { Package } from "@/lib/data";
 import { initiatePaymentAction } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+
 
 const transportIcons: { [key: string]: React.ReactNode } = {
   Flight: <Plane className="h-5 w-5" />,
@@ -31,13 +37,43 @@ interface PackageDetailsClientProps {
   pkg: Package;
 }
 
+const PaymentFormSchema = z.object({
+  payerName: z.string().min(2, { message: "Name is required." }),
+  payerEmail: z.string().email({ message: "A valid email is required." }),
+  payerMobile: z.string().regex(/^[0-9]{10}$/, { message: "Must be a 10-digit mobile number." }),
+  paymentOption: z.enum(["full", "custom"]),
+  customAmount: z.string().optional(),
+}).refine(data => {
+    if (data.paymentOption === 'custom') {
+        const amount = Number(data.customAmount);
+        return !isNaN(amount) && amount > 0;
+    }
+    return true;
+}, {
+    message: "Please enter a valid custom amount.",
+    path: ["customAmount"],
+});
+
+
 export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
-  const [paymentOption, setPaymentOption] = useState("full");
-  const [customAmount, setCustomAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const [paymentData, setPaymentData] = useState<{encData: string, clientCode: string, spURL: string} | null>(null);
+
+  const form = useForm<z.infer<typeof PaymentFormSchema>>({
+    resolver: zodResolver(PaymentFormSchema),
+    defaultValues: {
+      payerName: "",
+      payerEmail: "",
+      payerMobile: "",
+      paymentOption: "full",
+      customAmount: ""
+    }
+  });
+
+  const paymentOption = form.watch("paymentOption");
+  const customAmount = form.watch("customAmount");
 
   const amountToPay = paymentOption === 'full' ? pkg.price : Number(customAmount);
 
@@ -47,47 +83,37 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
     }
   }, [paymentData]);
 
-  async function handlePayment() {
-    if (paymentOption === 'custom' && (amountToPay <= 0 || customAmount === '')) {
-        toast({
-            title: "Invalid Amount",
-            description: "Please enter a valid custom payment amount.",
-            variant: "destructive",
-        });
-        return;
-    }
-    
+  async function handlePayment(values: z.infer<typeof PaymentFormSchema>) {
     setIsProcessing(true);
     try {
-        const result = await initiatePaymentAction({
-            amount: amountToPay,
-            // You can add real customer details here in the future
-            payerName: "Test Customer",
-            payerEmail: "test@example.com",
-            payerMobile: "9876543210"
-        });
+      const result = await initiatePaymentAction({
+        amount: values.paymentOption === 'full' ? pkg.price : Number(values.customAmount),
+        payerName: values.payerName,
+        payerEmail: values.payerEmail,
+        payerMobile: values.payerMobile,
+      });
 
-        if (result.success && result.data) {
-            setPaymentData(result.data);
-        } else {
-            toast({
-                title: "Payment Error",
-                description: result.error || "Could not initiate payment.",
-                variant: "destructive",
-            });
-            setIsProcessing(false);
-        }
-
-    } catch (error) {
-        console.error(error);
+      if (result.success && result.data) {
+        setPaymentData(result.data);
+      } else {
         toast({
-            title: "An Unexpected Error Occurred",
-            description: "Please try again later.",
-            variant: "destructive",
+          title: "Payment Error",
+          description: result.error || "Could not initiate payment.",
+          variant: "destructive",
         });
         setIsProcessing(false);
+      }
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "An Unexpected Error Occurred",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+      setIsProcessing(false);
     }
   }
+
 
   return (
     <>
@@ -206,7 +232,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                         <DialogTitle className="text-2xl font-bold text-center">Complete Your Booking</DialogTitle>
                       </DialogHeader>
                       <div className="mt-4">
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 border-b pb-4 mb-4">
                            <Image src={pkg.image} alt={pkg.name} width={120} height={80} className="rounded-md object-cover" data-ai-hint="travel landscape"/>
                            <div>
                               <h3 className="font-semibold text-lg">{pkg.name}</h3>
@@ -215,36 +241,92 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                            </div>
                         </div>
 
-                        <RadioGroup value={paymentOption} onValueChange={setPaymentOption} className="mt-6 space-y-3">
-                          <Label className="flex items-center gap-3 rounded-lg border p-4 cursor-pointer hover:bg-accent has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
-                            <RadioGroupItem value="full" id="full_payment" />
-                            Pay Full Amount: ₹{pkg.price.toLocaleString()}
-                          </Label>
-                          <Label className="flex items-center gap-3 rounded-lg border p-4 cursor-pointer hover:bg-accent has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
-                             <RadioGroupItem value="custom" id="custom_payment" />
-                            Pay a Custom Amount
-                          </Label>
-                        </RadioGroup>
+                        <Form {...form}>
+                          <form onSubmit={form.handleSubmit(handlePayment)} className="space-y-4">
+                            <FormField control={form.control} name="payerName" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Full Name</FormLabel>
+                                    <FormControl><Input placeholder="Your Name" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                             <FormField control={form.control} name="payerEmail" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Email Address</FormLabel>
+                                    <FormControl><Input placeholder="your.email@example.com" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                             <FormField control={form.control} name="payerMobile" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Mobile Number</FormLabel>
+                                    <FormControl><Input placeholder="9876543210" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
 
-                        {paymentOption === 'custom' && (
-                          <div className="mt-4">
-                            <Label htmlFor="custom-amount">Enter Amount</Label>
-                            <Input
-                              id="custom-amount"
-                              type="number"
-                              placeholder="Enter advance amount"
-                              value={customAmount}
-                              onChange={(e) => setCustomAmount(e.target.value)}
-                              className="mt-1"
+                            <FormField
+                              control={form.control}
+                              name="paymentOption"
+                              render={({ field }) => (
+                                <FormItem className="space-y-3 pt-4">
+                                  <FormLabel>Payment Option</FormLabel>
+                                  <FormControl>
+                                    <RadioGroup
+                                      onValueChange={field.onChange}
+                                      defaultValue={field.value}
+                                      className="space-y-2"
+                                    >
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="full" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          Pay Full Amount: ₹{pkg.price.toLocaleString()}
+                                        </FormLabel>
+                                      </FormItem>
+                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                          <RadioGroupItem value="custom" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          Pay a Custom Amount
+                                        </FormLabel>
+                                      </FormItem>
+                                    </RadioGroup>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
                             />
-                          </div>
-                        )}
-                      </div>
-                      <div className="mt-6">
-                        <Button className="w-full h-12 text-lg" onClick={handlePayment} disabled={isProcessing}>
-                           {isProcessing ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : null}
-                           {isProcessing ? 'Processing...' : `Pay Now: ₹${amountToPay > 0 ? amountToPay.toLocaleString() : ''}`}
-                        </Button>
+
+                            {paymentOption === 'custom' && (
+                              <FormField
+                                control={form.control}
+                                name="customAmount"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Custom Amount</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        placeholder="Enter advance amount"
+                                        {...field}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            )}
+                            <div className="mt-6">
+                              <Button type="submit" className="w-full h-12 text-lg" disabled={isProcessing}>
+                                 {isProcessing ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : null}
+                                 {isProcessing ? 'Processing...' : `Pay Now: ₹${amountToPay > 0 ? amountToPay.toLocaleString() : ''}`}
+                              </Button>
+                            </div>
+                          </form>
+                        </Form>
                       </div>
                     </DialogContent>
                   </Dialog>

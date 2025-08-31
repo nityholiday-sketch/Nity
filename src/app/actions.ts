@@ -1,3 +1,4 @@
+
 "use server";
 
 import { z } from "zod";
@@ -34,9 +35,9 @@ export async function contactAction(data: z.infer<typeof ContactFormSchema>) {
 
 const PaymentInitiationSchema = z.object({
   amount: z.number(),
-  payerName: z.string().default("Nityholiday Customer"),
-  payerEmail: z.string().email().default("customer@nityholiday.com"),
-  payerMobile: z.string().default("9999999999"),
+  payerName: z.string(),
+  payerEmail: z.string().email(),
+  payerMobile: z.string(),
 });
 
 export async function initiatePaymentAction(values: z.infer<typeof PaymentInitiationSchema>) {
