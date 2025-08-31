@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import React, { Suspense } from 'react';
 
-function PaymentStatus() {
+function PaymentStatusContent() {
   const searchParams = useSearchParams();
   const status = searchParams.get('status');
   const txnId = searchParams.get('txnId');
@@ -73,8 +73,8 @@ function PaymentStatus() {
 
 export default function PaymentStatusPage() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <PaymentStatus />
+        <Suspense fallback={<div className="container mx-auto flex min-h-[60vh] items-center justify-center py-12">Loading payment status...</div>}>
+            <PaymentStatusContent />
         </Suspense>
     )
 }
