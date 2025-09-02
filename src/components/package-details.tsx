@@ -224,7 +224,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                     <DialogTrigger asChild>
                        <Button className="w-full">
                         <CreditCard className="mr-2 h-4 w-4" />
-                        Book Now
+                        Proceed to Payment
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[480px]">
