@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Globe, Users, Target, ShieldCheck, BadgePercent, Headset, CalendarCheck, FileText, Landmark, Phone, Mail } from "lucide-react";
+import { Globe, Users, Target, ShieldCheck, BadgePercent, Headset, CalendarCheck, FileText, Landmark, Phone, Mail, Ban } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 
 export const metadata: Metadata = {
   title: "About Us",
@@ -41,6 +43,17 @@ export default function AboutPage() {
                 </p>
             </div>
         </div>
+
+        <div className="mt-24">
+             <Alert>
+                <Ban className="h-4 w-4" />
+                <AlertTitle className="font-headline">Our Business Focus</AlertTitle>
+                <AlertDescription>
+                   Nity Holiday is a domestic and international tour operator offering curated holiday packages. We are not a gaming, voucher, or utility/DMT service provider, nor do we operate as a travel aggregator for flight, bus, or train bookings. Our focus is solely on providing memorable and well-organized travel experiences.
+                </AlertDescription>
+            </Alert>
+        </div>
+
 
         <div className="mt-24 text-center">
           <div className="flex flex-col items-center space-y-3 max-w-3xl mx-auto">

@@ -41,7 +41,20 @@ export default function TermsOfServicePage() {
             <li>You acknowledge that initiating a transaction constitutes a binding contract with the Platform Owner.</li>
           </ul>
 
-          <h3>3. Limitation of Liability</h3>
+          <h3>3. Prohibited Use</h3>
+          <p>
+            You agree not to use the Platform for any of the following prohibited activities:
+          </p>
+          <ul>
+            <li>Engaging in or promoting any form of gaming, gambling, or betting.</li>
+            <li>Selling or distributing vouchers, gift cards, or any form of stored value.</li>
+            <li>Providing or facilitating utility bill payments, Direct-to-Home (DTH) recharges, or Direct Money Transfer (DMT) services.</li>
+            <li>Operating as a travel aggregator or using third-party APIs for flight, bus, or train bookings. Our services are limited to the packages we curate and provide directly.</li>
+            <li>Any other activity that is illegal, fraudulent, or violates these Terms of Service.</li>
+          </ul>
+
+
+          <h3>4. Limitation of Liability</h3>
           <p>We are not liable for:</p>
           <ul>
             <li>Inaccuracies or errors in content</li>
@@ -49,7 +62,7 @@ export default function TermsOfServicePage() {
             <li>Service disruptions or delays beyond our control</li>
           </ul>
 
-          <h3>4. Indemnification</h3>
+          <h3>5. Indemnification</h3>
           <p>
             You agree to indemnify and hold harmless NITYTRAVELTODREAM LLP and its affiliates from any losses, claims, or legal costs arising from:
           </p>
@@ -59,18 +72,18 @@ export default function TermsOfServicePage() {
             <li>Infringement of third-party rights</li>
           </ul>
 
-          <h3>5. Force Majeure</h3>
+          <h3>6. Force Majeure</h3>
           <p>
             Neither party shall be held liable for failure to fulfill obligations due to unforeseen events such as natural disasters, legal restrictions, or other force majeure conditions.
           </p>
 
-          <h3>6. Governing Law & Jurisdiction</h3>
+          <h3>7. Governing Law & Jurisdiction</h3>
           <ul>
             <li>These Terms are governed by the laws of India.</li>
             <li>All disputes shall fall under the exclusive jurisdiction of the courts in Bhinmal, Rajasthan.</li>
           </ul>
 
-          <h3>7. Contact Information</h3>
+          <h3>8. Contact Information</h3>
           <p>
             For queries or concerns related to these Terms, please reach out via email at <a href="mailto:nity.holiday@gmail.com">nity.holiday@gmail.com</a> or through the other contact details provided on our website.
           </p>
