@@ -22,7 +22,19 @@ export default function AboutPage() {
             Crafting unforgettable travel experiences with passion and expertise.
           </p>
         </div>
-        <div className="mt-12 grid md:grid-cols-2 gap-12 items-center">
+
+        <div className="mt-16">
+             <Alert variant="destructive" className="max-w-4xl mx-auto border-2 border-destructive/50 p-6 bg-destructive/5">
+                <Ban className="h-5 w-5" />
+                <AlertTitle className="font-headline text-xl text-destructive">Our Business Focus: Tour Packages Only</AlertTitle>
+                <AlertDescription className="text-destructive/90 mt-2">
+                   Nity Holiday is a domestic and international tour operator offering curated holiday packages. We are not a gaming, voucher, or utility/DMT service provider, nor do we operate as a travel aggregator for flight, bus, or train bookings. Our focus is solely on providing memorable and well-organized travel experiences.
+                </AlertDescription>
+            </Alert>
+        </div>
+
+
+        <div className="mt-16 grid md:grid-cols-2 gap-12 items-center">
             <div className="relative w-full h-80 rounded-lg overflow-hidden shadow-lg">
                 <video
                     src="https://firebasestorage.googleapis.com/v0/b/nityholiday-adventures.firebasestorage.app/o/about%20us%20video.mp4?alt=media&token=2827218a-03f8-44b4-8390-007920813df9"
@@ -42,16 +54,6 @@ export default function AboutPage() {
                     Founded with a passion for travel and a commitment to exceptional service, our team brings years of experience in the travel industry to every package we create. We understand that a vacation is more than just a trip—it's an experience that creates lasting memories.
                 </p>
             </div>
-        </div>
-
-        <div className="mt-24">
-             <Alert>
-                <Ban className="h-4 w-4" />
-                <AlertTitle className="font-headline">Our Business Focus</AlertTitle>
-                <AlertDescription>
-                   Nity Holiday is a domestic and international tour operator offering curated holiday packages. We are not a gaming, voucher, or utility/DMT service provider, nor do we operate as a travel aggregator for flight, bus, or train bookings. Our focus is solely on providing memorable and well-organized travel experiences.
-                </AlertDescription>
-            </Alert>
         </div>
 
 
