@@ -151,7 +151,7 @@ export const packages: Package[] = [
     name: '2 Days / 2 Nights Living Desert Camp',
     image: 'https://picsum.photos/seed/living-desert/600/400',
     description: 'Discover the charm of Rajasthan with our exclusive 2 Days / 2 Nights Living Desert Camp package. Enjoy a royal stay in luxury Swiss tents, mesmerizing camel and jeep safaris, Rajasthani folk music, traditional cuisine, and unforgettable sunsets amidst the golden dunes. Perfect for travelers who want to feel the true desert spirit with comfort and culture.',
-    price: 8000,
+    price: 5500,
     duration: '2 Days / 2 Nights',
     transport: ['Bus'],
     featured: true,
