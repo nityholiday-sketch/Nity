@@ -1,3 +1,4 @@
+
 export type Package = {
   id: string;
   slug: string;
@@ -240,6 +241,42 @@ export const packages: Package[] = [
       'Basic travel insurance',
     ],
     exclusions: [ 'Airfare/train fare', 'Lunches and dinners', 'Optional activity costs', 'Personal expenses' ],
+  },
+  {
+    id: 'splendid-andaman',
+    slug: 'splendid-andaman',
+    name: 'Splendid Andaman (2N Port Blair + 2N Havelock + 1N Neil)',
+    image: 'https://picsum.photos/seed/splendid-andaman/600/400',
+    description: 'Embark on an unforgettable journey to the Andaman Islands. This package covers Port Blair, Havelock, and Neil Island, offering a perfect blend of adventure and relaxation.',
+    price: 81500,
+    duration: '6 Days/5 Nights',
+    transport: ['Flight'],
+    featured: false,
+    itinerary: [
+        { day: 1, title: 'Airport Pickup, Carbyns Cove Beach, Cellular Jail & Light and Sound Show', description: 'Arrive at Port Blair Airport and transfer to your hotel. Later, proceed to Corbyns Cove Beach. In the evening, attend the enthralling Sound and Light Show at Cellular Jail, which brings the heroic saga of the Indian freedom struggle to life.' },
+        { day: 2, title: 'Port Blair to Havelock, Radhanagar Beach', description: 'Depart from Port Blair to Havelock Island on a ferry. Upon arrival, check into your hotel. Later, visit one of Asia\'s best beaches, Radhanagar Beach, and enjoy the beautiful sunset.' },
+        { day: 3, title: 'Elephant Beach Tour & Snorkelling', description: 'Take a boat to Elephant Beach, one of the most visited snorkeling destinations. Enjoy a complimentary snorkeling session and explore the vibrant coral reefs. Return to your hotel in the afternoon.' },
+        { day: 4, title: 'Havelock to Neil Island, Laxmanpur Beach Sunset', description: 'Board a premium cruise to Neil Island. Check into your resort and later visit Laxmanpur Beach to witness a magnificent sunset.' },
+        { day: 5, title: 'Bharatpur Beach, Natural Rock Formation, Return to Port Blair', description: 'After breakfast, visit the Natural Rock Formation and Bharatpur Beach, where you can indulge in water sports. Later, board a cruise back to Port Blair for an overnight stay.' },
+        { day: 6, title: 'Drop to the Airport', description: 'Check out from the hotel and proceed to the airport for your return journey with sweet memories of this exotic destination.' },
+    ],
+    inclusions: [
+      'Accommodation with Breakfast and Dinner at all Hotels.',
+      'All transfers by private AC Ertiga car at Port Blair, Havelock Island, & Neil Island.',
+      'Entry & Ferry tickets to all mentioned places.',
+      'Elephanta Island speed boat charges.',
+      'Inter-Island transfers by AC Luxury tourist ferry (Govt. ferry if private is unavailable).',
+      'Airport and Jetty pickup/drop.',
+      'All taxes.',
+    ],
+    exclusions: [
+      'Lunch',
+      'Any kind of ship fare.',
+      'Extra excursions not in the itinerary.',
+      'Water sports activities.',
+      'Personal expenses (laundry, room services, etc.).',
+      'Expenses due to unforeseen circumstances like bad weather or political unrest.',
+    ],
   },
   {
     id: 'gujarat-heritage-wildlife-tour',
