@@ -24,7 +24,7 @@ export function Footer() {
                 <Link href="#"><Twitter className="h-5 w-5" /></Link>
               </Button>
               <Button variant="ghost" size="icon" asChild>
-                <Link href="#"><Instagram className="h-5 w-5" /></Link>
+                <Link href="https://www.instagram.com/nity_holiday/?igsh=MWJjYXl6MGQ4dnZtMw%3D%3D#"><Instagram className="h-5 w-5" /></Link>
               </Button>
             </div>
           </div>
