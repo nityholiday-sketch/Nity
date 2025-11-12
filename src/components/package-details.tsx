@@ -38,9 +38,9 @@ interface PackageDetailsClientProps {
 }
 
 const PaymentFormSchema = z.object({
-  payerName: z.string().min(2, { message: "Name is required." }),
-  payerEmail: z.string().email({ message: "A valid email is required." }),
-  payerMobile: z.string().regex(/^[0-9]{10}$/, { message: "Must be a 10-digit mobile number." }),
+  name: z.string().min(2, { message: "Name is required." }),
+  email: z.string().email({ message: "A valid email is required." }),
+  phone: z.string().regex(/^[0-9]{10}$/, { message: "Must be a 10-digit mobile number." }),
   paymentOption: z.enum(["full", "custom"]),
   customAmount: z.string().optional(),
 }).refine(data => {
@@ -54,19 +54,32 @@ const PaymentFormSchema = z.object({
     path: ["customAmount"],
 });
 
+type VegaahPaymentData = {
+    action: string;
+    key: string;
+    txnid: string;
+    amount: string;
+    productinfo: string;
+    firstname: string;
+    email: string;
+    phone: string;
+    surl: string;
+    furl: string;
+    hash: string;
+}
 
 export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const [paymentData, setPaymentData] = useState<{encData: string, clientCode: string, spURL: string} | null>(null);
+  const [paymentData, setPaymentData] = useState<VegaahPaymentData | null>(null);
 
   const form = useForm<z.infer<typeof PaymentFormSchema>>({
     resolver: zodResolver(PaymentFormSchema),
     defaultValues: {
-      payerName: "",
-      payerEmail: "",
-      payerMobile: "",
+      name: "",
+      email: "",
+      phone: "",
       paymentOption: "full",
       customAmount: ""
     }
@@ -88,17 +101,18 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
     try {
       const result = await initiatePaymentAction({
         amount: values.paymentOption === 'full' ? pkg.price : Number(values.customAmount),
-        payerName: values.payerName,
-        payerEmail: values.payerEmail,
-        payerMobile: values.payerMobile,
+        name: values.name,
+        email: values.email,
+        phone: values.phone,
+        productinfo: pkg.name
       });
 
       if (result.success && result.data) {
-        setPaymentData(result.data);
+        setPaymentData(result.data as VegaahPaymentData);
       } else {
         toast({
           title: "Payment Error",
-          description: result.error || "Could not initiate payment.",
+          description: "Could not initiate payment.",
           variant: "destructive",
         });
         setIsProcessing(false);
@@ -243,21 +257,21 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
 
                         <Form {...form}>
                           <form onSubmit={form.handleSubmit(handlePayment)} className="space-y-4">
-                            <FormField control={form.control} name="payerName" render={({ field }) => (
+                            <FormField control={form.control} name="name" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Full Name</FormLabel>
                                     <FormControl><Input placeholder="Your Name" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />
-                             <FormField control={form.control} name="payerEmail" render={({ field }) => (
+                             <FormField control={form.control} name="email" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Email Address</FormLabel>
                                     <FormControl><Input placeholder="your.email@example.com" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />
-                             <FormField control={form.control} name="payerMobile" render={({ field }) => (
+                             <FormField control={form.control} name="phone" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Mobile Number</FormLabel>
                                     <FormControl><Input placeholder="9876543210" {...field} /></FormControl>
@@ -340,9 +354,10 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
       </div>
     </div>
     {paymentData && (
-        <form ref={formRef} action={paymentData.spURL} method="POST" style={{ display: 'none' }}>
-            <input type="hidden" name="encData" value={paymentData.encData} />
-            <input type="hidden" name="clientCode" value={paymentData.clientCode} />
+        <form ref={formRef} action={paymentData.action} method="POST" style={{ display: 'none' }}>
+            {Object.entries(paymentData).map(([key, value]) =>
+                <input type="hidden" name={key} value={value} key={key}/>
+            )}
         </form>
     )}
     </>

@@ -1,47 +1,44 @@
+
 import { NextRequest, NextResponse } from 'next/server';
-import { decrypt } from '@/lib/sabpaisa';
-import { URLSearchParams } from 'url';
+import crypto from 'crypto';
 
 export async function POST(req: NextRequest) {
   try {
-    const bodyText = await req.text();
-    const encResponse = new URLSearchParams(bodyText).get('encResponse');
+    const formData = await req.formData();
+    const responseData = Object.fromEntries(formData.entries());
 
-
-    if (typeof encResponse !== 'string') {
-      return NextResponse.json({ error: 'Invalid response from payment gateway' }, { status: 400 });
-    }
-
-    const decryptedData = decrypt(encResponse);
+    console.log("VegaaH Callback Data:", responseData);
     
-    // Log the full decrypted string for debugging
-    console.log("Decrypted SabPaisa Response:", decryptedData);
+    const salt = process.env.VEGAAH_SALT!;
+    const key = process.env.VEGAAH_MERCHANT_KEY!;
+    const status = responseData.status as string;
+    const txnid = responseData.txnid as string;
+    const amount = responseData.amount as string;
+    const productinfo = responseData.productinfo as string;
+    const firstname = responseData.firstname as string;
+    const email = responseData.email as string;
+    const receivedHash = responseData.hash as string;
 
-    // Parse the decrypted string into an object
-    const responseParams = new URLSearchParams(decryptedData);
-    const responseJson: { [key: string]: string | null } = {};
-    responseParams.forEach((value, key) => {
-        responseJson[key] = value;
-    });
+    const hashString = `${salt}|${status}|||||||||||${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
+    const computedHash = crypto.createHash('sha512').update(hashString).digest('hex');
 
-    console.log("Parsed SabPaisa Response JSON:", responseJson);
-
-    const statusCode = responseJson.statusCode;
-
-    // Here you would typically update your database based on the payment status
-    // For example: find the order by clientTxnId and update its status.
-    if (statusCode === '0000') {
-      // Payment Successful
-      console.log(`Payment successful for clientTxnId: ${responseJson.clientTxnId}`);
-    } else {
-      // Payment Failed or Aborted
-      console.log(`Payment failed/aborted for clientTxnId: ${responseJson.clientTxnId}. Status: ${responseJson.status}, Message: ${responseJson.sabpaisaMessage}`);
-    }
-
-    // Redirect user to a success or failure page
     const redirectUrl = new URL('/payment-status', req.nextUrl.origin);
-    redirectUrl.searchParams.set('status', responseJson.status || 'UNKNOWN');
-    redirectUrl.searchParams.set('txnId', responseJson.clientTxnId || '');
+    redirectUrl.searchParams.set('txnId', txnid);
+
+    if (receivedHash !== computedHash) {
+        console.error("Payment callback hash mismatch!");
+        redirectUrl.searchParams.set('status', 'ERROR');
+        redirectUrl.searchParams.set('reason', 'Hash mismatch');
+        return NextResponse.redirect(redirectUrl);
+    }
+    
+    if (status === 'success') {
+      console.log(`Payment successful for txnid: ${txnid}`);
+      redirectUrl.searchParams.set('status', 'SUCCESS');
+    } else {
+      console.log(`Payment failed for txnid: ${txnid}. Status: ${status}, Error: ${responseData.error_Message}`);
+      redirectUrl.searchParams.set('status', 'FAILED');
+    }
 
     return NextResponse.redirect(redirectUrl);
 

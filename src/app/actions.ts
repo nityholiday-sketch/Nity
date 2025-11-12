@@ -4,7 +4,7 @@
 import { z } from "zod";
 import { generatePersonalizedTravelTips } from "@/ai/flows/personalized-travel-tips";
 import { ContactFormSchema } from "@/components/contact-form";
-import { encrypt } from "@/lib/sabpaisa";
+import crypto from 'crypto';
 
 // Define the schema for the AI tips form input
 const TravelTipsSchema = z.object({
@@ -35,50 +35,43 @@ export async function contactAction(data: z.infer<typeof ContactFormSchema>) {
 
 const PaymentInitiationSchema = z.object({
   amount: z.number(),
-  payerName: z.string(),
-  payerEmail: z.string().email(),
-  payerMobile: z.string(),
+  name: z.string(),
+  email: z.string().email(),
+  phone: z.string(),
+  productinfo: z.string(),
 });
 
 export async function initiatePaymentAction(values: z.infer<typeof PaymentInitiationSchema>) {
-    const clientCode = process.env.SABPAISA_CLIENT_CODE!;
-    const transUserName = process.env.SABPAISA_USERNAME!;
-    const transUserPassword = process.env.SABPAISA_PASSWORD!;
-    const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/payment-callback`;
-    const channelId = "W";
-    const mcc = process.env.SABPAISA_MCC!;
-    const spURL = process.env.SABPAISA_URL!;
+    const key = process.env.VEGAAH_MERCHANT_KEY!;
+    const salt = process.env.VEGAAH_SALT!;
+    const vegaahURL = process.env.VEGAAH_URL!;
 
-    const clientTxnId = `NITY-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const txnid = `NITY-${Date.now()}`;
+    const surl = `${process.env.NEXT_PUBLIC_APP_URL}/api/payment-callback`;
+    const furl = `${process.env.NEXT_PUBLIC_APP_URL}/api/payment-callback`;
 
-    const now = new Date();
-    const pad = (n: number) => (n < 10 ? '0' + n : n);
-    const transDate =
-        now.getFullYear() + '-' +
-        pad(now.getMonth() + 1) + '-' +
-        pad(now.getDate()) + ' ' +
-        pad(now.getHours()) + ':' +
-        pad(now.getMinutes()) + ':' +
-        pad(now.getSeconds());
+    const data = {
+        key: key,
+        txnid: txnid,
+        amount: values.amount.toString(),
+        productinfo: values.productinfo,
+        firstname: values.name,
+        email: values.email,
+        phone: values.phone,
+        surl: surl,
+        furl: furl,
+    };
 
-    const requestString = `payerName=${values.payerName}&payerEmail=${values.payerEmail}&payerMobile=${values.payerMobile}&clientTxnId=${clientTxnId}&amount=${values.amount}&clientCode=${clientCode}&transUserName=${transUserName}&transUserPassword=${transUserPassword}&callbackUrl=${callbackUrl}&channelId=${channelId}&mcc=${mcc}&transDate=${transDate}`;
+    const hashString = `${key}|${txnid}|${data.amount}|${data.productinfo}|${data.firstname}|${data.email}|||||||||||${salt}`;
+    
+    const hash = crypto.createHash('sha512').update(hashString).digest('hex');
 
-    console.log("Plaintext request string:", requestString);
-
-    try {
-        const encData = encrypt(requestString);
-
-        return {
-            success: true,
-            data: {
-                encData,
-                clientCode,
-                spURL
-            }
-        };
-
-    } catch (error) {
-        console.error("Payment Initiation Error:", error);
-        return { success: false, error: "Failed to initiate payment." };
-    }
+    return {
+        success: true,
+        data: {
+            ...data,
+            hash: hash,
+            action: vegaahURL
+        }
+    };
 }
