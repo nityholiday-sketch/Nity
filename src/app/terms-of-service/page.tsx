@@ -23,7 +23,7 @@ export default function TermsOfServicePage() {
             Published as per Rule 3(1) of the Information Technology (Intermediaries Guidelines) Rules, 2011, this document outlines the Terms of Use, Privacy Policy, and other applicable rules for the usage of our website: <a href="https://nityholiday.com">https://nityholiday.com</a> (hereinafter referred to as the "Platform"), including its mobile site and mobile app.
           </p>
           <p>
-            The Platform is owned and operated by NITYTRAVELTODREAM LLP, a company incorporated under the Companies Act, 1956 and having its registered office at: Ajmeri Gate Extension, AGC R, Ansari Road - 110002.
+            The Platform is owned and operated by NITYTRAVELTODREAM LLP, a company incorporated under the Companies Act, 1956 and having its registered office at: Nitytravletodream llp 34 opp bank of baroda BHINMAL.
           </p>
 
           <h3>2. General Terms of Use</h3>
@@ -97,3 +97,5 @@ export default function TermsOfServicePage() {
     </div>
   );
 }
+
+    

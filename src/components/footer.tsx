@@ -51,8 +51,8 @@ export function Footer() {
             <h3 className="font-headline font-semibold">Contact us</h3>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                 <li>nity.holiday@gmail.com</li>
-                <li>Ajmeri Gate Extension, AGC R, Ansari Road - 110002</li>
-                <li>+91 81605 49415</li>
+                <li>Nitytravletodream llp 34 opp bank of baroda BHINMAL</li>
+                <li>+91 9785798008</li>
             </ul>
           </div>
         </div>
@@ -63,3 +63,5 @@ export function Footer() {
     </footer>
   );
 }
+
+    

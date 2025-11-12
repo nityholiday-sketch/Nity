@@ -33,7 +33,7 @@ export default function ContactPage() {
                   <MapPin className="h-6 w-6 mr-4 text-primary mt-1" />
                   <div>
                     <span className="font-semibold text-foreground">Address:</span><br/>
-                    Ajmeri Gate Extension, AGC R, Ansari Road - 110002
+                    Nitytravletodream llp 34 opp bank of baroda BHINMAL
                   </div>
                 </li>
                 <li className="flex items-center">
@@ -47,7 +47,7 @@ export default function ContactPage() {
                   <Phone className="h-6 w-6 mr-4 text-primary" />
                   <div>
                      <span className="font-semibold text-foreground">Phone:</span>
-                    <a href="tel:+918160549415" className="block hover:text-primary">+91 81605 49415</a>
+                    <a href="tel:+919785798008" className="block hover:text-primary">+91 9785798008</a>
                   </div>
                 </li>
               </ul>
@@ -68,3 +68,5 @@ export default function ContactPage() {
     </div>
   );
 }
+
+    
