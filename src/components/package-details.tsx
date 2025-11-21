@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import type { Package } from "@/lib/data";
-import { initiatePaymentAction } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -48,10 +47,11 @@ const PaymentFormSchema = z.object({
   postalCode: z.string().min(5, { message: "Postal code is required." }),
   country: z.string().length(2, { message: "Must be a 2-letter country code (e.g., IN)." }),
   paymentOption: z.enum(["full", "custom"]),
-  customAmount: z.string().optional().transform(e => e === "" || e === undefined ? 0 : parseFloat(e)),
+  customAmount: z.string().optional(),
 }).refine(data => {
     if (data.paymentOption === 'custom') {
-        return data.customAmount > 0;
+        const amount = parseFloat(data.customAmount || '0');
+        return amount > 0;
     }
     return true;
 }, {
@@ -76,7 +76,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
       postalCode: "",
       country: "IN",
       paymentOption: "full",
-      customAmount: 0,
+      customAmount: "0",
     }
   });
 
@@ -85,44 +85,54 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
   async function handlePayment(values: z.infer<typeof PaymentFormSchema>) {
     setIsProcessing(true);
 
+    const amount = values.paymentOption === 'full' ? pkg.price : parseFloat(values.customAmount || '0');
     const orderId = `NITY_${Date.now()}`;
-    const amount = values.paymentOption === 'full' ? pkg.price : values.customAmount;
 
     try {
-      const result = await initiatePaymentAction({
-        amount: amount,
-        orderId: orderId,
-        packageName: pkg.name,
-        customer: {
-            name: values.name,
-            email: values.email,
-            phone: values.phone,
-            street: values.street,
-            city: values.city,
-            state: values.state,
-            postalCode: values.postalCode,
-            country: values.country,
-        }
-      });
+        const paymentData = {
+            orderId: orderId,
+            amount: amount,
+            currency: 'SAR',
+            customerName: values.name,
+            customerEmail: values.email,
+            customerMobile: values.phone,
+            packageName: pkg.name,
+            billingAddress: {
+                street: values.street,
+                city: values.city,
+                state: values.state,
+                postalCode: values.postalCode,
+                country: values.country
+            }
+        };
 
-      if (result.success && result.data?.paymentUrl) {
-         window.location.href = result.data.paymentUrl;
-      } else {
+        const response = await fetch('/api/payments/vegaah', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(paymentData)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Payment initiation failed');
+        }
+
+        if (result.paymentLink) {
+            window.location.href = result.paymentLink;
+        } else {
+            throw new Error('Payment link not received');
+        }
+
+    } catch (error: any) {
         toast({
-          title: "Payment Error",
-          description: result.error || "Could not initiate payment. Please try again.",
-          variant: "destructive",
+            title: "Payment Error",
+            description: error.message || "Could not initiate payment. Please try again.",
+            variant: "destructive",
         });
         setIsProcessing(false);
-      }
-    } catch (error) {
-      console.error(error);
-      toast({
-        title: "An Unexpected Error Occurred",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
-      setIsProcessing(false);
     }
   }
 
@@ -131,7 +141,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
     if (option === 'full') {
         return pkg.price;
     }
-    const customAmount = form.getValues("customAmount");
+    const customAmount = parseFloat(form.getValues("customAmount") || '0');
     return customAmount > 0 ? customAmount : 0;
   }
 
@@ -326,7 +336,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                                 <FormField control={form.control} name="country" render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Country Code</FormLabel>
-                                        <FormControl><Input placeholder="IN for India" {...field} /></FormControl>
+                                        <FormControl><Input placeholder="IN" {...field} /></FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )} />
@@ -379,7 +389,6 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                                         type="number"
                                         placeholder="Enter advance amount"
                                         {...field}
-                                        onChange={e => field.onChange(e.target.value)}
                                       />
                                     </FormControl>
                                     <FormMessage />
