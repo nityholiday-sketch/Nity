@@ -76,9 +76,8 @@ export async function initiatePaymentAction(values: z.infer<typeof PaymentInitia
     
     const signature = crypto.createHash('sha256').update(signatureString).digest('hex');
 
-    // 2. Prepare Payload
+    // 2. Prepare Payload (aligns with doc page 9)
     const payload = {
-      trackid: trackId,
       terminalId: VEGAAH_TERMINAL_ID,
       password: VEGAAH_PASSWORD,
       signature: signature,
