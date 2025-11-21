@@ -37,12 +37,17 @@ export async function contactAction(data: z.infer<typeof ContactFormSchema>) {
 const PaymentInitiationSchema = z.object({
   amount: z.number(),
   orderId: z.string(),
-  customer: z.object({
-    email: z.string().email(),
-    name: z.string(),
-    phone: z.string(),
-  }),
   packageName: z.string(),
+  customer: z.object({
+    name: z.string(),
+    email: z.string().email(),
+    phone: z.string(),
+    street: z.string(),
+    city: z.string(),
+    state: z.string(),
+    postalCode: z.string(),
+    country: z.string(),
+  }),
 });
 
 export async function initiatePaymentAction(values: z.infer<typeof PaymentInitiationSchema>) {
@@ -88,13 +93,13 @@ export async function initiatePaymentAction(values: z.infer<typeof PaymentInitia
         customerEmail: customer.email,
         customerName: customer.name,
         customerMobile: customer.phone,
-        billingAddressPostalCode: "12345", // Required for AVS
-        billingAddressCountry: "SA", // Required for AVS
-        billingAddressCity: "Riyadh", // Required for AVS
-        billingAddressState: "Riyadh", // Required for AVS
-        billingAddressStreet: "King Fahd Road" // Required for AVS
+        billingAddressStreet: customer.street,
+        billingAddressCity: customer.city,
+        billingAddressState: customer.state,
+        billingAddressPostalCode: customer.postalCode,
+        billingAddressCountry: customer.country,
       },
-      callbackUrl: `${NEXT_PUBLIC_APP_URL}/vgcspay/paymentstatus/callback`,
+      callbackUrl: `${NEXT_PUBLIC_APP_URL}/api/payment-callback`,
     };
 
     try {

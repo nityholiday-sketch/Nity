@@ -14,8 +14,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogDescription,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import type { Package } from "@/lib/data";
@@ -42,6 +42,11 @@ const PaymentFormSchema = z.object({
   name: z.string().min(2, { message: "Name is required." }),
   email: z.string().email({ message: "A valid email is required." }),
   phone: z.string().regex(/^[0-9]{10}$/, { message: "Must be a 10-digit mobile number." }),
+  street: z.string().min(5, { message: "Street address is required." }),
+  city: z.string().min(2, { message: "City is required." }),
+  state: z.string().min(2, { message: "State is required." }),
+  postalCode: z.string().min(5, { message: "Postal code is required." }),
+  country: z.string().min(2, { message: "Country code is required (e.g., SA)." }),
   paymentOption: z.enum(["full", "custom"]),
   customAmount: z.string().optional().transform(e => e === "" || e === undefined ? 0 : parseFloat(e)),
 }).refine(data => {
@@ -65,6 +70,11 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
       name: "",
       email: "",
       phone: "",
+      street: "",
+      city: "",
+      state: "",
+      postalCode: "",
+      country: "SA",
       paymentOption: "full",
       customAmount: 0,
     }
@@ -87,6 +97,11 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
             name: values.name,
             email: values.email,
             phone: values.phone,
+            street: values.street,
+            city: values.city,
+            state: values.state,
+            postalCode: values.postalCode,
+            country: values.country,
         }
       });
 
@@ -252,27 +267,70 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
 
                         <Form {...form}>
                           <form onSubmit={form.handleSubmit(handlePayment)} className="space-y-4">
-                            <FormField control={form.control} name="name" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Full Name</FormLabel>
-                                    <FormControl><Input placeholder="Your Name" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
-                             <FormField control={form.control} name="email" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email Address</FormLabel>
-                                    <FormControl><Input placeholder="your.email@example.com" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
-                             <FormField control={form.control} name="phone" render={({ field }) => (
+                            <div className="grid grid-cols-2 gap-4">
+                                <FormField control={form.control} name="name" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Full Name</FormLabel>
+                                        <FormControl><Input placeholder="Your Name" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                                 <FormField control={form.control} name="email" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Email Address</FormLabel>
+                                        <FormControl><Input placeholder="your.email@example.com" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                            </div>
+                            <FormField control={form.control} name="phone" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Mobile Number</FormLabel>
                                     <FormControl><Input placeholder="9876543210" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />
+                            
+                            <h4 className="text-sm font-medium pt-2">Billing Address</h4>
+                            <FormField control={form.control} name="street" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Street</FormLabel>
+                                    <FormControl><Input placeholder="King Fahd Road" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                             <div className="grid grid-cols-2 gap-4">
+                                <FormField control={form.control} name="city" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>City</FormLabel>
+                                        <FormControl><Input placeholder="Riyadh" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                                <FormField control={form.control} name="state" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>State</FormLabel>
+                                        <FormControl><Input placeholder="Riyadh" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                             </div>
+                             <div className="grid grid-cols-2 gap-4">
+                                <FormField control={form.control} name="postalCode" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Postal Code</FormLabel>
+                                        <FormControl><Input placeholder="12345" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                                <FormField control={form.control} name="country" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Country Code</FormLabel>
+                                        <FormControl><Input placeholder="SA" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                            </div>
 
                             <FormField
                               control={form.control}
