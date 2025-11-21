@@ -92,11 +92,10 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
         const paymentData = {
             orderId: orderId,
             amount: amount,
-            currency: 'SAR',
+            packageName: pkg.name,
             customerName: values.name,
             customerEmail: values.email,
             customerMobile: values.phone,
-            packageName: pkg.name,
             billingAddress: {
                 street: values.street,
                 city: values.city,
@@ -123,16 +122,14 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
           result = await response.json();
         } catch (parseError) {
           console.error('Failed to parse API response:', parseError);
+          const responseText = await response.text();
+          console.error('Raw response text:', responseText);
           throw new Error('Invalid response from server');
         }
 
         console.log('API Response data:', result);
 
-        if (!result) {
-          throw new Error('No response received from payment gateway');
-        }
-
-        if (!result.success) {
+        if (!result || !result.success) {
             throw new Error(result.error || 'Payment initiation failed');
         }
 

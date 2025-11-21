@@ -11,14 +11,16 @@ export async function POST(request: NextRequest) {
     const {
       orderId,
       amount,
-      currency = 'SAR',
+      packageName, // Added this to match frontend
       customerName,
       customerEmail,
       customerMobile,
       billingAddress,
-      packageName, // Added this to match frontend
       paymentType = '1'
     } = body;
+
+    // Hardcode currency to SAR as per gateway configuration
+    const currency = 'SAR';
 
     // Validate required fields
     if (!orderId || !amount || !customerEmail || !customerMobile) {
@@ -71,6 +73,8 @@ export async function POST(request: NextRequest) {
     console.log('Generating signature with:', {
       trackId,
       terminalId,
+      password: '***', // Don't log password
+      merchantKey: '***', // Don't log key
       amount: formattedAmount,
       currency
     });
