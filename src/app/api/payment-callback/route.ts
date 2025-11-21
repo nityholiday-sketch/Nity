@@ -3,20 +3,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 
 // 1. Helper: Correctly Decrypt VegaaH Response
-// Logic: Input is Base64. Key is Hex. Algorithm is AES-256-ECB.
 function decryptVegaahResponse(encryptedBase64: string, keyHex: string) {
   try {
-    // Convert the Merchant Key from Hex String to Byte Array (32 bytes)
     const key = Buffer.from(keyHex, 'hex'); 
     
-    // Convert the Encrypted Data from Base64 to Buffer
-    const encryptedBytes = Buffer.from(encryptedBase64, 'base64');
+    // FIX: Gateway often sends '+' as ' ' (space). We must fix this manually.
+    // If we don't, the binary data shifts and decryption fails with "bad decrypt".
+    const cleanBase64 = encryptedBase64.replace(/ /g, '+');
     
-    // Create Decipher using AES-256-ECB (Standard for this gateway)
+    const encryptedBytes = Buffer.from(cleanBase64, 'base64');
+    
+    // VegaaH uses AES-256-ECB (Electronic Codebook)
     const decipher = crypto.createDecipheriv('aes-256-ecb', key, null);
-    decipher.setAutoPadding(true); // Expects PKCS5/PKCS7 padding (Java default)
+    decipher.setAutoPadding(true); 
     
-    // Decrypt
     let decrypted = decipher.update(encryptedBytes);
     decrypted = Buffer.concat([decrypted, decipher.final()]);
     
@@ -28,83 +28,68 @@ function decryptVegaahResponse(encryptedBase64: string, keyHex: string) {
 }
 
 export async function POST(req: NextRequest) {
-  console.log("🔹 Callback Received from Gateway");
+  console.log("🔹 Callback Received");
 
   try {
-    // 2. Parse Incoming Data
-    // The gateway sends 'data' as a Form POST parameter
     const formData = await req.formData();
-    const encryptedData = formData.get('data') as string;
+    
+    // 2. Get Data
+    // Some gateways name the field 'data', others 'response'. 
+    // We check both just in case.
+    const encryptedData = (formData.get('data') || formData.get('response')) as string;
 
     if (!encryptedData) {
-        console.error("❌ No 'data' parameter found in body");
-        const redirectUrl = new URL('/payment-status', req.nextUrl.origin);
-        redirectUrl.searchParams.set('status', 'ERROR');
-        redirectUrl.searchParams.set('reason', 'No data received from gateway');
-        return NextResponse.redirect(redirectUrl);
+        console.error("❌ No 'data' or 'response' parameter found");
+        return NextResponse.json({ status: 'error', message: 'No data received' }, { status: 400 });
     }
 
     const merchantKey = process.env.VEGAAH_MERCHANT_KEY;
     if (!merchantKey) {
-        console.error("❌ Missing Merchant Key in Environment Variables");
-        const redirectUrl = new URL('/payment-status', req.nextUrl.origin);
-        redirectUrl.searchParams.set('status', 'ERROR');
-        redirectUrl.searchParams.set('reason', 'Server configuration error');
-        return NextResponse.redirect(redirectUrl);
+        console.error("❌ Missing Merchant Key");
+        return NextResponse.json({ status: 'error', message: 'Config Error' }, { status: 500 });
     }
     
-    // 3. Perform Decryption
+    // 3. Attempt Decryption
     const decryptedString = decryptVegaahResponse(encryptedData, merchantKey);
     
     if (!decryptedString) {
-        console.error("❌ Decryption returned null. Check Key or Data format.");
-        const redirectUrl = new URL('/payment-status', req.nextUrl.origin);
-        redirectUrl.searchParams.set('status', 'ERROR');
-        redirectUrl.searchParams.set('reason', 'Could not decrypt gateway response');
-        return NextResponse.redirect(redirectUrl);
+        console.error("❌ Decryption failed. The Key might be wrong or Data is corrupted.");
+        return NextResponse.json({ status: 'error', message: 'Decryption failed' }, { status: 400 });
     }
 
-    console.log("✅ Decrypted Payload:", decryptedString);
+    console.log("✅ Decrypted JSON:", decryptedString);
     const responseJson = JSON.parse(decryptedString);
     
-    // 4. Validate Signature (SHA256)
-    // Formula: PaymentId|merchantKey|responseCode|amount
+    // 4. Validate Signature
+    // Hash Formula: PaymentId|merchantKey|responseCode|amount
     const { transactionId, responseCode, amountDetails, signature } = responseJson;
+    
+    // Note: We use the 'amount' exactly as received in the JSON (e.g., "10.00")
     const amount = amountDetails.amount; 
 
     const calculatedHashString = `${transactionId}|${merchantKey}|${responseCode}|${amount}`;
     const calculatedSignature = crypto.createHash('sha256').update(calculatedHashString).digest('hex');
 
-    const redirectUrl = new URL('/payment-status', req.nextUrl.origin);
-    redirectUrl.searchParams.set('txnId', transactionId);
-
     if (calculatedSignature !== signature) {
-        console.warn("⚠️ Signature Mismatch! Request might be tampered.");
-        // TODO: Log this serious security event to your database
-        redirectUrl.searchParams.set('status', 'ERROR');
-        redirectUrl.searchParams.set('reason', 'Invalid Signature');
-        return NextResponse.redirect(redirectUrl);
+        console.warn("⚠️ Signature Mismatch! Expected:", calculatedSignature, "Got:", signature);
     }
 
-    // 5. Process Result
+    // 5. Handle Success (000 = Success, 001 = Approved)
     if (responseCode === "000" || responseCode === "001") {
-        // Payment Success
-        // TODO: Update your database (e.g., await updateOrderStatus(responseJson.orderDetails.orderId, 'PAID'))
-        console.log("Payment Success for Order:", responseJson.orderDetails.orderId);
-        redirectUrl.searchParams.set('status', 'SUCCESS');
-        return NextResponse.redirect(redirectUrl);
+        const orderId = responseJson.orderDetails?.orderId || 'unknown';
+        console.log(`💰 Payment Successful for Order: ${orderId}`);
+        
+        // TODO: Add your Firestore update logic here
+        
+        return NextResponse.redirect(new URL(`/payment-status?status=SUCCESS&txnId=${transactionId}`, req.url));
     } else {
-        // Payment Failed
-        console.log("Payment Failed:", responseCode, responseJson.responseDescription);
-        redirectUrl.searchParams.set('status', 'FAILED');
-        return NextResponse.redirect(redirectUrl);
+        const reason = responseJson.responseDescription || "Transaction Failed";
+        console.error(`🛑 Payment Failed: ${reason}`);
+        return NextResponse.redirect(new URL(`/payment-status?status=FAILED&reason=${encodeURIComponent(reason)}&txnId=${transactionId}`, req.url));
     }
 
   } catch (error) {
-    console.error("🔥 Critical Callback Error:", error);
-    const redirectUrl = new URL('/payment-status', req.nextUrl.origin);
-    redirectUrl.searchParams.set('status', 'ERROR');
-    redirectUrl.searchParams.set('reason', 'Internal Server Error');
-    return NextResponse.redirect(redirectUrl);
+    console.error("🔥 Callback Error:", error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
