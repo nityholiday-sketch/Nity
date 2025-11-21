@@ -29,12 +29,7 @@ export async function POST(req: NextRequest) {
 
     const {
       orderId,
-      packageName,
       amount,
-      customerName,
-      customerEmail,
-      customerMobile,
-      billingAddress,
     } = body;
 
     // Validate required fields
@@ -69,12 +64,12 @@ export async function POST(req: NextRequest) {
       amount: amountStr,
       currency: CURRENCY,
       order: {
-        orderId: trackId, // Use the same trackId as signature
-        description: "Purchase of product XYZ" // Static like curl for now
+        orderId: trackId, // Use the same trackId as signature generation
+        description: "Purchase of product XYZ" // Static value from working curl
       },
       customer: {
         customerEmail: "", // Empty like working curl
-        billingAddressStreet: "R.B. Street", // Static defaults like curl
+        billingAddressStreet: "R.B. Street", // Static defaults from working curl
         billingAddressCity: "MUMBAI",
         billingAddressState: "MAHARASHTRA",
         billingAddressPostalCode: "400075",
@@ -137,7 +132,7 @@ export async function POST(req: NextRequest) {
 
     // Check for successful response codes from VegaaH
     if (responseCode !== "001" && responseCode !== "000") {
-      console.error("Gateway error - Response code:", responseCode);
+      console.error("Gateway error - Response code:", responseCode, gatewayJson.responseDescription);
       return NextResponse.json(
         {
           success: false,
