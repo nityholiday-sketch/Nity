@@ -36,7 +36,6 @@ export async function contactAction(data: z.infer<typeof ContactFormSchema>) {
 
 const PaymentInitiationSchema = z.object({
   amount: z.number(),
-  currency: z.string().default('SAR'),
   orderId: z.string(),
   customer: z.object({
     email: z.string().email(),
@@ -47,73 +46,72 @@ const PaymentInitiationSchema = z.object({
 });
 
 export async function initiatePaymentAction(values: z.infer<typeof PaymentInitiationSchema>) {
-    const { amount, currency, orderId, customer, packageName } = values;
+    const { amount, orderId, customer, packageName } = values;
 
-    const merchantKey = process.env.VEGAAH_MERCHANT_KEY;
-    const terminalId = process.env.VEGAAH_TERMINAL_ID;
-    const password = process.env.VEGAAH_PASSWORD;
-    const requestUrl = process.env.VEGAAH_REQUEST_URL;
+    const {
+      VEGAAH_MERCHANT_KEY,
+      VEGAAH_TERMINAL_ID,
+      VEGAAH_PASSWORD,
+      VEGAAH_REQUEST_URL
+    } = process.env;
 
-    if (!merchantKey || !terminalId || !password || !requestUrl) {
-      console.error("VegaaH gateway credentials are not configured in .env");
+    if (!VEGAAH_MERCHANT_KEY || !VEGAAH_TERMINAL_ID || !VEGAAH_PASSWORD || !VEGAAH_REQUEST_URL) {
+      console.error("Missing Payment Configuration");
       return { success: false, error: "Payment service is not configured." };
     }
 
+    const currency = "SAR";
+    const formattedAmount = amount.toFixed(2);
+
+    // 1. Generate Request Signature using SHA256 
+    // Format: trackId|terminalId|password|mechantkey|amount|currency
+    const signatureString = `${orderId}|${VEGAAH_TERMINAL_ID}|${VEGAAH_PASSWORD}|${VEGAAH_MERCHANT_KEY}|${formattedAmount}|${currency}`;
+    
+    const signature = crypto.createHash('sha256').update(signatureString).digest('hex');
+
+    // 2. Prepare Payload
+    const payload = {
+      paymentType: "1", // Purchase
+      terminalId: VEGAAH_TERMINAL_ID,
+      password: VEGAAH_PASSWORD,
+      signature: signature,
+      amount: formattedAmount,
+      currency: currency,
+      order: {
+        orderId: orderId,
+        description: `Booking for ${packageName}`
+      },
+      customer: {
+        customerEmail: customer.email,
+        customerName: customer.name,
+        customerMobile: customer.phone,
+        billingAddressPostalCode: "12345", // Required for AVS
+        billingAddressCountry: "SA", // Required for AVS
+        billingAddressCity: "Riyadh", // Required for AVS
+        billingAddressState: "Riyadh", // Required for AVS
+        billingAddressStreet: "King Fahd Road" // Required for AVS
+      }
+    };
+
     try {
-      // Hashing Logic
-      const amountFormatted = amount.toFixed(2);
-      const trackId = orderId;
-      const hashString = `${trackId}|${terminalId}|${password}|${merchantKey}|${amountFormatted}|${currency}`;
-      
-      const signature = crypto.createHash('sha256').update(hashString).digest('hex');
+      // 3. Send Request
+      const response = await axios.post(VEGAAH_REQUEST_URL, payload);
 
-      // API Request Payload
-      const payload = {
-        paymentType: "1", // 1 for purchase
-        terminalId: terminalId,
-        password: password,
-        signature: signature,
-        amount: amountFormatted,
-        currency: currency,
-        order: {
-          orderId: orderId,
-          description: `Booking for ${packageName}`
-        },
-        customer: {
-          customerEmail: customer.email,
-          customerName: customer.name,
-          customerMobile: customer.phone,
-          billingAddressStreet: "NA",
-          billingAddressCity: "NA",
-          billingAddressState: "NA",
-          billingAddressPostalCode: "00000",
-          billingAddressCountry: "IN"
-        },
-      };
-
-      console.log("Sending payment request to VegaaH:", payload);
-
-      // Send request to VegaaH
-      const response = await axios.post(requestUrl, payload);
-      const responseData = response.data;
-      
-      console.log("Received response from VegaaH:", responseData);
-
-      if (responseData && responseData.paymentLink?.linkUrl) {
-        return {
+      if (response.data && response.data.paymentLink && response.data.paymentLink.linkUrl) {
+        // Return the URL to the client
+         return {
           success: true,
           data: {
-            paymentUrl: responseData.paymentLink.linkUrl,
-            transactionId: responseData.transactionId,
+            paymentUrl: response.data.paymentLink.linkUrl,
+            transactionId: response.data.transactionId,
           }
         };
       } else {
-        console.error("Failed to get payment link from VegaaH", responseData);
-        return { success: false, error: "Could not initiate payment. Please try again." };
+        console.error("VegaaH Error:", response.data);
+        return { success: false, error: response.data.responseDescription || "Payment initiation failed" };
       }
-
     } catch (error) {
-      console.error("Error during VegaaH payment initiation:", error);
-      return { success: false, error: "An unexpected error occurred while initiating payment." };
+      console.error("Payment API Error:", error);
+      return { success: false, error: "Connection to payment gateway failed." };
     }
 }
