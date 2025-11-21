@@ -15,7 +15,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const pkg = packages.find((p) => p.slug === params.slug);
+  const awaitedParams = await params;
+  const pkg = packages.find((p) => p.slug === awaitedParams.slug);
 
   if (!pkg) {
     return {
@@ -41,8 +42,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function PackageDetailsPage({ params }: Props) {
-  const pkg = packages.find((p) => p.slug === params.slug);
+export default async function PackageDetailsPage({ params }: Props) {
+  const awaitedParams = await params;
+  const pkg = packages.find((p) => p.slug === awaitedParams.slug);
 
   if (!pkg) {
     notFound();
