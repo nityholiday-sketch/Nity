@@ -5,7 +5,7 @@ import crypto from "crypto";
 const TERMINAL_ID  = process.env.VEGAAH_TERMINAL_ID!;
 const PASSWORD     = process.env.VEGAAH_PASSWORD!;
 const MERCHANT_KEY = process.env.VEGAAH_MERCHANT_KEY!;
-const CURRENCY     = "SAR";
+const CURRENCY     = "INR";
 
 const VEGAH_URL =
   "https://test-vegaah.concertosoft.com/vegaahpayments/v2/payments/pay-request";
@@ -22,6 +22,12 @@ function generateVegaahSignature(params: {
   const data = `${trackId}|${terminalId}|${password}|${merchantKey}|${amount}|${currency}`;
   return crypto.createHash("sha256").update(data, "utf8").digest("hex");
 }
+
+function generateTrackId(orderId: string): string {
+  const timestamp = Date.now();
+  return `${orderId}_${timestamp}`;
+}
+
 
 export async function POST(req: NextRequest) {
   try {
@@ -136,9 +142,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-function generateTrackId(orderId: string): string {
-  const timestamp = Date.now();
-  return `${orderId}_${timestamp}`;
 }
