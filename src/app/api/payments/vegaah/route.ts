@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { generateVegaahSignature, formatAmount, generateTrackId } from '@/lib/vegaah';
 
@@ -10,8 +11,8 @@ export async function POST(request: NextRequest) {
     
     const {
       orderId,
+      packageName,
       amount,
-      packageName, // Added this to match frontend
       customerName,
       customerEmail,
       customerMobile,

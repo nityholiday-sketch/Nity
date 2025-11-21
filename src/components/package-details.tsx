@@ -440,4 +440,3 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
     </>
   );
 }
-
