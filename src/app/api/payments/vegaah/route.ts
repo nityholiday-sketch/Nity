@@ -1,40 +1,79 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateVegaahSignature, formatAmount, generateTrackId } from '@/utils/vegaah';
+import { generateVegaahSignature, formatAmount, generateTrackId } from '@/lib/vegaah';
 
 export async function POST(request: NextRequest) {
   try {
+    // Parse request body
     const body = await request.json();
+    
+    console.log('Received payment request:', body);
     
     const {
       orderId,
       amount,
-      currency = 'SAR', // Defaulting to SAR as per doc
+      currency = 'SAR',
       customerName,
       customerEmail,
       customerMobile,
       billingAddress,
-      packageName,
-      paymentType = '1' // 1 for purchase
+      packageName, // Added this to match frontend
+      paymentType = '1'
     } = body;
 
     // Validate required fields
-    if (!orderId || !amount || !customerEmail || !customerMobile || !packageName) {
+    if (!orderId || !amount || !customerEmail || !customerMobile) {
+      console.error('Missing required fields:', { orderId, amount, customerEmail, customerMobile });
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { 
+          success: false,
+          error: 'Missing required fields',
+          details: {
+            orderId: !orderId ? 'Order ID is required' : undefined,
+            amount: !amount ? 'Amount is required' : undefined,
+            customerEmail: !customerEmail ? 'Email is required' : undefined,
+            customerMobile: !customerMobile ? 'Mobile is required' : undefined,
+          }
+        },
         { status: 400 }
       );
     }
 
-    // Environment variables
-    const terminalId = process.env.VEGAAH_TERMINAL_ID!;
-    const password = process.env.VEGAAH_PASSWORD!;
-    const merchantKey = process.env.VEGAAH_MERCHANT_KEY!;
-    const requestUrl = process.env.VEGAAH_REQUEST_URL!;
+    // Get environment variables
+    const terminalId = process.env.VEGAAH_TERMINAL_ID;
+    const password = process.env.VEGAAH_PASSWORD;
+    const merchantKey = process.env.VEGAAH_MERCHANT_KEY;
+    const requestUrl = process.env.VEGAAH_REQUEST_URL;
     const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/vegaah/callback`;
+
+
+    // Validate environment variables
+    if (!terminalId || !password || !merchantKey || !requestUrl) {
+      console.error('Missing environment variables:', {
+        terminalId: !!terminalId,
+        password: !!password,
+        merchantKey: !!merchantKey,
+        requestUrl: !!requestUrl
+      });
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Payment gateway configuration error',
+          details: 'Missing required environment variables'
+        },
+        { status: 500 }
+      );
+    }
 
     // Generate track ID and format amount
     const trackId = generateTrackId(orderId);
     const formattedAmount = formatAmount(Number(amount));
+
+    console.log('Generating signature with:', {
+      trackId,
+      terminalId,
+      amount: formattedAmount,
+      currency
+    });
 
     // Generate signature
     const signature = generateVegaahSignature(
@@ -46,7 +85,7 @@ export async function POST(request: NextRequest) {
       currency
     );
 
-    // Prepare request payload according to VegaaH specification
+    // Prepare request payload
     const payload = {
       terminalId,
       password,
@@ -82,31 +121,75 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(payload)
     });
 
-    const responseData = await response.json();
+    let responseData;
+    const responseText = await response.text();
     
-    console.log('VegaaH Response:', JSON.stringify(responseData, null, 2));
+    console.log('VegaaH Raw Response:', responseText);
 
+    try {
+      responseData = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Failed to parse VegaaH response:', parseError);
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Invalid response from payment gateway',
+          details: responseText
+        },
+        { status: 502 }
+      );
+    }
+
+    console.log('VegaaH Parsed Response:', JSON.stringify(responseData, null, 2));
+
+    // Check if response is successful
     if (!response.ok) {
-      throw new Error(responseData.responseDescription || 'Payment initiation failed at gateway');
+      console.error('VegaaH API error:', responseData);
+      return NextResponse.json(
+        { 
+          success: false,
+          error: responseData.responseDescription || 'Payment initiation failed at gateway',
+          details: responseData
+        },
+        { status: response.status }
+      );
     }
 
-    // Check response code from VegaaH
+    // Check response code (000 = success, 001 = approved)
     if (responseData.responseCode !== '001' && responseData.responseCode !== '000') {
-      throw new Error(responseData.responseDescription || 'Gateway rejected payment initiation');
+      console.error('VegaaH returned error code:', responseData.responseCode);
+      return NextResponse.json(
+        { 
+          success: false,
+          error: responseData.responseDescription || 'Gateway rejected payment initiation',
+          responseCode: responseData.responseCode,
+          details: responseData
+        },
+        { status: 400 }
+      );
     }
 
+    // Success response
     return NextResponse.json({
       success: true,
       transactionId: responseData.transactionId,
       paymentLink: responseData.paymentLink?.linkUrl,
+      trackId,
+      responseCode: responseData.responseCode,
+      responseDescription: responseData.responseDescription,
+      data: responseData
     });
 
   } catch (error: any) {
     console.error('VegaaH Payment Route Error:', error);
+    console.error('Error stack:', error.stack);
+    
     return NextResponse.json(
       { 
+        success: false,
         error: error.message || 'An internal server error occurred during payment initiation.',
-        details: error.toString()
+        details: error.toString(),
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       },
       { status: 500 }
     );

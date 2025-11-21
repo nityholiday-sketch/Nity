@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import type { Package } from "@/lib/data";
-import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -38,16 +37,16 @@ interface PackageDetailsClientProps {
 }
 
 const PaymentFormSchema = z.object({
-  name: z.string().min(2, { message: "Name is required." }),
-  email: z.string().email({ message: "A valid email is required." }),
-  phone: z.string().regex(/^[0-9]{10,15}$/, { message: "Must be a valid mobile number." }),
-  street: z.string().min(5, { message: "Street address is required." }),
-  city: z.string().min(2, { message: "City is required." }),
-  state: z.string().min(2, { message: "State is required." }),
-  postalCode: z.string().min(5, { message: "Postal code is required." }),
-  country: z.string().length(2, { message: "Must be a 2-letter country code (e.g., IN)." }),
-  paymentOption: z.enum(["full", "custom"]),
-  customAmount: z.string().optional(),
+    name: z.string().min(2, { message: "Name is required." }),
+    email: z.string().email({ message: "A valid email is required." }),
+    phone: z.string().regex(/^[0-9]{10,15}$/, { message: "Must be a valid mobile number." }),
+    street: z.string().min(5, { message: "Street address is required." }),
+    city: z.string().min(2, { message: "City is required." }),
+    state: z.string().min(2, { message: "State is required." }),
+    postalCode: z.string().min(5, { message: "Postal code is required." }),
+    country: z.string().length(2, { message: "Must be a 2-letter country code (e.g., IN)." }),
+    paymentOption: z.enum(["full", "custom"]),
+    customAmount: z.string().optional(),
 }).refine(data => {
     if (data.paymentOption === 'custom') {
         const amount = parseFloat(data.customAmount || '0');
@@ -62,7 +61,7 @@ const PaymentFormSchema = z.object({
 
 export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
   const [isProcessing, setIsProcessing] = useState(false);
-  const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof PaymentFormSchema>>({
     resolver: zodResolver(PaymentFormSchema),
@@ -84,6 +83,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
 
   async function handlePayment(values: z.infer<typeof PaymentFormSchema>) {
     setIsProcessing(true);
+    setError(null);
 
     const amount = values.paymentOption === 'full' ? pkg.price : parseFloat(values.customAmount || '0');
     const orderId = `NITY_${Date.now()}`;
@@ -106,6 +106,8 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
             }
         };
 
+        console.log('Initiating payment with data:', paymentData);
+        
         const response = await fetch('/api/payments/vegaah', {
             method: 'POST',
             headers: {
@@ -114,24 +116,36 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
             body: JSON.stringify(paymentData)
         });
 
-        const result = await response.json();
+        console.log('API Response status:', response.status);
 
-        if (!response.ok || !result.success) {
+        let result;
+        try {
+          result = await response.json();
+        } catch (parseError) {
+          console.error('Failed to parse API response:', parseError);
+          throw new Error('Invalid response from server');
+        }
+
+        console.log('API Response data:', result);
+
+        if (!result) {
+          throw new Error('No response received from payment gateway');
+        }
+
+        if (!result.success) {
             throw new Error(result.error || 'Payment initiation failed');
         }
 
         if (result.paymentLink) {
+            console.log('Redirecting to payment link:', result.paymentLink);
             window.location.href = result.paymentLink;
         } else {
-            throw new Error('Payment link not received');
+            throw new Error('Payment link not received from gateway');
         }
 
     } catch (error: any) {
-        toast({
-            title: "Payment Error",
-            description: error.message || "Could not initiate payment. Please try again.",
-            variant: "destructive",
-        });
+        console.error('Payment Error:', error);
+        setError(error.message || 'Failed to initiate payment. Please try again.');
         setIsProcessing(false);
     }
   }
@@ -251,7 +265,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                     <CardTitle className="font-headline">Book This Tour</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Dialog>
+                  <Dialog onOpenChange={() => setError(null)}>
                     <DialogTrigger asChild>
                        <Button className="w-full">
                         <CreditCard className="mr-2 h-4 w-4" />
@@ -261,7 +275,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                     <DialogContent className="sm:max-w-[480px]">
                       <DialogHeader>
                         <DialogTitle className="text-2xl font-bold text-center">Complete Your Booking</DialogTitle>
-                         <DialogDescription id="payment-dialog-description">
+                         <DialogDescription>
                             Enter your details and payment information to finalize your booking. Our team will contact you to confirm the booking after payment.
                         </DialogDescription>
                       </DialogHeader>
@@ -274,6 +288,20 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                               <p className="font-bold text-lg mt-1">₹{pkg.price.toLocaleString()}</p>
                            </div>
                         </div>
+
+                        {error && (
+                            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                                <div className="flex items-start">
+                                <svg className="w-5 h-5 text-red-600 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                </svg>
+                                <div>
+                                    <h3 className="text-sm font-medium text-red-800">Payment Error</h3>
+                                    <p className="mt-1 text-sm text-red-700">{error}</p>
+                                </div>
+                                </div>
+                            </div>
+                        )}
 
                         <Form {...form}>
                           <form onSubmit={form.handleSubmit(handlePayment)} className="space-y-4">
@@ -291,7 +319,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                                         <FormControl><Input placeholder="your.email@example.com" {...field} /></FormControl>
                                         <FormMessage />
                                     </FormItem>
-                                )} />
+                                )}/>
                             </div>
                             <FormField control={form.control} name="phone" render={({ field }) => (
                                 <FormItem>
@@ -398,8 +426,14 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                             )}
                             <div className="mt-6">
                               <Button type="submit" className="w-full h-12 text-lg" disabled={isProcessing}>
-                                 {isProcessing ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : null}
-                                 {isProcessing ? 'Processing...' : `Pay Now: ₹${getAmountToPay() > 0 ? getAmountToPay().toLocaleString() : ''}`}
+                                 {isProcessing ? (
+                                    <span className="flex items-center justify-center">
+                                      <Loader2 className="animate-spin h-5 w-5 mr-2" />
+                                      Processing...
+                                    </span>
+                                  ) : (
+                                    `Pay Now: ₹${getAmountToPay() > 0 ? getAmountToPay().toLocaleString() : ''}`
+                                  )}
                               </Button>
                             </div>
                           </form>
