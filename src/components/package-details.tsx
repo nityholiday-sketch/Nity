@@ -54,25 +54,10 @@ const PaymentFormSchema = z.object({
     path: ["customAmount"],
 });
 
-type VegaahPaymentData = {
-    action: string;
-    key: string;
-    txnid: string;
-    amount: string;
-    productinfo: string;
-    firstname: string;
-    email: string;
-    phone: string;
-    surl: string;
-    furl: string;
-    hash: string;
-}
 
 export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
-  const formRef = useRef<HTMLFormElement>(null);
-  const [paymentData, setPaymentData] = useState<VegaahPaymentData | null>(null);
 
   const form = useForm<z.infer<typeof PaymentFormSchema>>({
     resolver: zodResolver(PaymentFormSchema),
@@ -90,29 +75,30 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
 
   const amountToPay = paymentOption === 'full' ? pkg.price : Number(customAmount);
 
-  useEffect(() => {
-    if (paymentData) {
-      formRef.current?.submit();
-    }
-  }, [paymentData]);
-
   async function handlePayment(values: z.infer<typeof PaymentFormSchema>) {
     setIsProcessing(true);
+
+    const orderId = `NITY_${Date.now()}`;
+    const amount = values.paymentOption === 'full' ? pkg.price : Number(values.customAmount);
+
     try {
       const result = await initiatePaymentAction({
-        amount: values.paymentOption === 'full' ? pkg.price : Number(values.customAmount),
-        name: values.name,
-        email: values.email,
-        phone: values.phone,
-        productinfo: pkg.name
+        amount: amount,
+        orderId: orderId,
+        packageName: pkg.name,
+        customer: {
+            name: values.name,
+            email: values.email,
+            phone: values.phone,
+        }
       });
 
-      if (result.success && result.data) {
-        setPaymentData(result.data as VegaahPaymentData);
+      if (result.success && result.data?.paymentUrl) {
+         window.location.href = result.data.paymentUrl;
       } else {
         toast({
           title: "Payment Error",
-          description: "Could not initiate payment.",
+          description: result.error || "Could not initiate payment. Please try again.",
           variant: "destructive",
         });
         setIsProcessing(false);
@@ -353,13 +339,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
         </div>
       </div>
     </div>
-    {paymentData && (
-        <form ref={formRef} action={paymentData.action} method="POST" style={{ display: 'none' }}>
-            {Object.entries(paymentData).map(([key, value]) =>
-                <input type="hidden" name={key} value={value} key={key}/>
-            )}
-        </form>
-    )}
+    
     </>
   );
 }
