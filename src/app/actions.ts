@@ -52,31 +52,34 @@ export async function initiatePaymentAction(values: z.infer<typeof PaymentInitia
       VEGAAH_MERCHANT_KEY,
       VEGAAH_TERMINAL_ID,
       VEGAAH_PASSWORD,
-      VEGAAH_REQUEST_URL
+      VEGAAH_REQUEST_URL,
+      NEXT_PUBLIC_APP_URL,
     } = process.env;
 
-    if (!VEGAAH_MERCHANT_KEY || !VEGAAH_TERMINAL_ID || !VEGAAH_PASSWORD || !VEGAAH_REQUEST_URL) {
+    if (!VEGAAH_MERCHANT_KEY || !VEGAAH_TERMINAL_ID || !VEGAAH_PASSWORD || !VEGAAH_REQUEST_URL || !NEXT_PUBLIC_APP_URL) {
       console.error("Missing Payment Configuration");
       return { success: false, error: "Payment service is not configured." };
     }
 
     const currency = "SAR";
     const formattedAmount = amount.toFixed(2);
+    const trackId = `${orderId}_Track`;
 
     // 1. Generate Request Signature using SHA256 
     // Format: trackId|terminalId|password|mechantkey|amount|currency
-    const signatureString = `${orderId}|${VEGAAH_TERMINAL_ID}|${VEGAAH_PASSWORD}|${VEGAAH_MERCHANT_KEY}|${formattedAmount}|${currency}`;
+    const signatureString = `${trackId}|${VEGAAH_TERMINAL_ID}|${VEGAAH_PASSWORD}|${VEGAAH_MERCHANT_KEY}|${formattedAmount}|${currency}`;
     
     const signature = crypto.createHash('sha256').update(signatureString).digest('hex');
 
     // 2. Prepare Payload
     const payload = {
-      paymentType: "1", // Purchase
+      trackid: trackId,
       terminalId: VEGAAH_TERMINAL_ID,
       password: VEGAAH_PASSWORD,
       signature: signature,
       amount: formattedAmount,
       currency: currency,
+      paymentType: "1", // Purchase
       order: {
         orderId: orderId,
         description: `Booking for ${packageName}`
@@ -90,7 +93,8 @@ export async function initiatePaymentAction(values: z.infer<typeof PaymentInitia
         billingAddressCity: "Riyadh", // Required for AVS
         billingAddressState: "Riyadh", // Required for AVS
         billingAddressStreet: "King Fahd Road" // Required for AVS
-      }
+      },
+      callbackUrl: `${NEXT_PUBLIC_APP_URL}/vgcspay/paymentstatus/callback`,
     };
 
     try {

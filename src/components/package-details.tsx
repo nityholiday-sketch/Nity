@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import type { Package } from "@/lib/data";
@@ -230,6 +231,9 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                     <DialogContent className="sm:max-w-[480px]">
                       <DialogHeader>
                         <DialogTitle className="text-2xl font-bold text-center">Complete Your Booking</DialogTitle>
+                        <DialogDescription>
+                            Enter your details and payment information to finalize your booking.
+                        </DialogDescription>
                       </DialogHeader>
                       <div className="mt-4">
                         <div className="flex items-center gap-4 border-b pb-4 mb-4">
