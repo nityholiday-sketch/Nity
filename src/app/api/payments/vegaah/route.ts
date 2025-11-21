@@ -23,12 +23,6 @@ function generateVegaahSignature(params: {
   return crypto.createHash("sha256").update(data, "utf8").digest("hex");
 }
 
-function generateTrackId(orderId: string): string {
-  const timestamp = Date.now();
-  return `${orderId}_${timestamp}`;
-}
-
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -42,31 +36,34 @@ export async function POST(req: NextRequest) {
       customerMobile,
       billingAddress,
     } = body;
-    
-    const trackId = generateTrackId(orderId);
+
+    // Use the original orderId from the client as the trackId for the signature,
+    // just like in the successful curl test.
+    const trackId = orderId;
     const amountStr = Number(amount).toFixed(2);
 
     const signature = generateVegaahSignature({
-      trackId: trackId,
+      trackId,
       terminalId: TERMINAL_ID,
       password: PASSWORD,
       merchantKey: MERCHANT_KEY,
       amount: amountStr,
       currency: CURRENCY,
     });
-    
+
     const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/vegaah/callback`;
 
+    // This payload structure now exactly matches the working curl request.
+    // It does NOT contain a top-level trackId or referenceId.
     const payRequestBody = {
-      trackId: trackId,
       terminalId: TERMINAL_ID,
       password: PASSWORD,
       signature,
-      paymentType: "1",
+      paymentType: "1", // "1" for Purchase Transaction
       amount: amountStr,
       currency: CURRENCY,
       order: {
-        orderId: trackId,
+        orderId: orderId, // Use the original orderId here
         description: packageName ?? "Tour booking",
       },
       customer: {
@@ -111,7 +108,7 @@ export async function POST(req: NextRequest) {
     const paymentLink = gatewayJson.paymentLink?.linkUrl;
     const transactionId = gatewayJson.transactionId;
 
-    if (responseCode !== "001" && responseCode !== "000" || !paymentLink) {
+    if ((responseCode !== "001" && responseCode !== "000") || !paymentLink) {
       return NextResponse.json(
         {
           success: false,
