@@ -43,11 +43,10 @@ const PaymentFormSchema = z.object({
   email: z.string().email({ message: "A valid email is required." }),
   phone: z.string().regex(/^[0-9]{10}$/, { message: "Must be a 10-digit mobile number." }),
   paymentOption: z.enum(["full", "custom"]),
-  customAmount: z.string().optional(),
+  customAmount: z.string().optional().transform(e => e === "" || e === undefined ? 0 : parseFloat(e)),
 }).refine(data => {
     if (data.paymentOption === 'custom') {
-        const amount = Number(data.customAmount);
-        return !isNaN(amount) && amount > 0;
+        return data.customAmount > 0;
     }
     return true;
 }, {
@@ -67,20 +66,17 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
       email: "",
       phone: "",
       paymentOption: "full",
-      customAmount: ""
+      customAmount: 0,
     }
   });
 
   const paymentOption = form.watch("paymentOption");
-  const customAmount = form.watch("customAmount");
-
-  const amountToPay = paymentOption === 'full' ? pkg.price : Number(customAmount);
 
   async function handlePayment(values: z.infer<typeof PaymentFormSchema>) {
     setIsProcessing(true);
 
     const orderId = `NITY_${Date.now()}`;
-    const amount = values.paymentOption === 'full' ? pkg.price : Number(values.customAmount);
+    const amount = values.paymentOption === 'full' ? pkg.price : values.customAmount;
 
     try {
       const result = await initiatePaymentAction({
@@ -113,6 +109,15 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
       });
       setIsProcessing(false);
     }
+  }
+
+  const getAmountToPay = () => {
+    const option = form.getValues("paymentOption");
+    if (option === 'full') {
+        return pkg.price;
+    }
+    const customAmount = form.getValues("customAmount");
+    return customAmount > 0 ? customAmount : 0;
   }
 
 
@@ -231,8 +236,8 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                     <DialogContent className="sm:max-w-[480px]">
                       <DialogHeader>
                         <DialogTitle className="text-2xl font-bold text-center">Complete Your Booking</DialogTitle>
-                        <DialogDescription>
-                            Enter your details and payment information to finalize your booking.
+                         <DialogDescription>
+                            Enter your details and payment information to finalize your booking. Our team will contact you to confirm the booking after payment.
                         </DialogDescription>
                       </DialogHeader>
                       <div className="mt-4">
@@ -316,6 +321,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                                         type="number"
                                         placeholder="Enter advance amount"
                                         {...field}
+                                        onChange={e => field.onChange(e.target.value)}
                                       />
                                     </FormControl>
                                     <FormMessage />
@@ -326,7 +332,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                             <div className="mt-6">
                               <Button type="submit" className="w-full h-12 text-lg" disabled={isProcessing}>
                                  {isProcessing ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : null}
-                                 {isProcessing ? 'Processing...' : `Pay Now: ₹${amountToPay > 0 ? amountToPay.toLocaleString() : ''}`}
+                                 {isProcessing ? 'Processing...' : `Pay Now: ₹${getAmountToPay() > 0 ? getAmountToPay().toLocaleString() : ''}`}
                               </Button>
                             </div>
                           </form>
