@@ -26,3 +26,4 @@ export function generateTrackId(orderId: string): string {
   const timestamp = Date.now();
   return `${orderId}_${timestamp}`;
 }
+

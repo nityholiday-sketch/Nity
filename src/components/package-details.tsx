@@ -132,7 +132,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
         console.log('API Response data:', result);
 
         if (!result.success) {
-            throw new Error(result.error || 'Payment initiation failed');
+            throw new Error(result.error || 'Gateway rejected payment initiation');
         }
 
         if (result.paymentLink) {
@@ -440,3 +440,4 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
     </>
   );
 }
+
