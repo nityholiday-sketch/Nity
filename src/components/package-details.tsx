@@ -350,7 +350,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                                 <FormField control={form.control} name="country" render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Country Code</FormLabel>
-                                        <FormControl><Input placeholder="IN" {...field} defaultValue="IN" /></FormControl>
+                                        <FormControl><Input placeholder="IN" {...field} /></FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )} />
