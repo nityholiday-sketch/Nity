@@ -37,8 +37,14 @@ export async function POST(req: NextRequest) {
       billingAddress,
     } = body;
 
-    // Use the original orderId from the client as the trackId for the signature,
-    // just like in the successful curl test.
+    // Validate required fields
+    if (!orderId || !amount || !customerEmail) {
+      return NextResponse.json(
+        { success: false, error: "Missing required fields: orderId, amount, or customerEmail" },
+        { status: 400 }
+      );
+    }
+
     const trackId = orderId;
     const amountStr = Number(amount).toFixed(2);
 
@@ -53,68 +59,90 @@ export async function POST(req: NextRequest) {
 
     const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/vegaah/callback`;
 
-    // This payload structure now exactly matches the working curl request.
-    // It does NOT contain a top-level trackId or referenceId.
+    // Match the exact structure from your working curl request
     const payRequestBody = {
       terminalId: TERMINAL_ID,
       password: PASSWORD,
       signature,
-      paymentType: "1", // "1" for Purchase Transaction
+      paymentType: "1",
       amount: amountStr,
       currency: CURRENCY,
       order: {
-        orderId: orderId, // Use the original orderId here
-        description: packageName ?? "Tour booking",
+        orderId: orderId,
+        description: packageName || "Tour booking",
       },
       customer: {
-        customerEmail,
-        billingAddressStreet: billingAddress?.street,
-        billingAddressCity: billingAddress?.city,
-        billingAddressState: billingAddress?.state,
-        billingAddressPostalCode: billingAddress?.postalCode,
-        billingAddressCountry: billingAddress?.country ?? "IN",
+        customerEmail: customerEmail || "",
+        billingAddressStreet: billingAddress?.street || "R.B. Street",
+        billingAddressCity: billingAddress?.city || "MUMBAI",
+        billingAddressState: billingAddress?.state || "MAHARASHTRA",
+        billingAddressPostalCode: billingAddress?.postalCode || "400075",
+        billingAddressCountry: billingAddress?.country || "IN",
       },
       additionalDetails: {
         userData: JSON.stringify({
-          customerName,
-          customerMobile,
-          packageName,
+          entryone: "abc",
+          entrytwo: "def",
+          entrythree: "xyz",
+          customerName: customerName || "",
+          customerMobile: customerMobile || "",
+          packageName: packageName || "",
           receiptUrl: callbackUrl,
         }),
       },
     };
 
-    console.log("VegaaH Request Body:", JSON.stringify(payRequestBody, null, 2));
+    console.log("=== VegaaH Request Debug ===");
+    console.log("Signature input:", `${trackId}|${TERMINAL_ID}|${PASSWORD}|${MERCHANT_KEY}|${amountStr}|${CURRENCY}`);
+    console.log("Generated signature:", signature);
+    console.log("Request body:", JSON.stringify(payRequestBody, null, 2));
 
     const gatewayRes = await fetch(VEGAH_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(payRequestBody),
     });
 
-    if (!gatewayRes.ok) {
-      const text = await gatewayRes.text();
-      console.error("VegaaH HTTP error:", gatewayRes.status, text);
+    const responseText = await gatewayRes.text();
+    console.log("Raw gateway response:", responseText);
+
+    let gatewayJson;
+    try {
+      gatewayJson = JSON.parse(responseText);
+    } catch (e) {
+      console.error("Failed to parse gateway response:", e);
       return NextResponse.json(
-        { success: false, error: `Gateway returned an error: ${gatewayRes.status}` },
+        { success: false, error: "Invalid response from gateway", raw: responseText },
         { status: 502 }
       );
     }
 
-    const gatewayJson = await gatewayRes.json();
-    console.log("VegaaH response:", gatewayJson);
+    console.log("Parsed gateway response:", gatewayJson);
 
     const responseCode = gatewayJson.responseCode;
     const paymentLink = gatewayJson.paymentLink?.linkUrl;
     const transactionId = gatewayJson.transactionId;
 
-    if ((responseCode !== "001" && responseCode !== "000") || !paymentLink) {
+    // Check for successful response codes
+    if (responseCode !== "001" && responseCode !== "000") {
       return NextResponse.json(
         {
           success: false,
-          error:
-            gatewayJson.responseDescription ||
-            "Payment initiation failed at gateway",
+          error: gatewayJson.responseDescription || "Payment initiation failed",
+          responseCode: responseCode,
+          raw: gatewayJson,
+        },
+        { status: 400 }
+      );
+    }
+
+    if (!paymentLink) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Payment link not received from gateway",
           raw: gatewayJson,
         },
         { status: 400 }
@@ -135,7 +163,7 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error("Vegaah route error:", err);
     return NextResponse.json(
-      { success: false, error: err.message || "An internal server error occurred." },
+      { success: false, error: err.message || "Internal server error" },
       { status: 500 }
     );
   }
