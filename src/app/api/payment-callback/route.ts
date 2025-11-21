@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
     const email = responseData.email as string;
     const receivedHash = responseData.hash as string;
 
+    // As per VegaaH docs, the hash string for response is: salt|status|||||||||||email|firstname|productinfo|amount|txnid|key
     const hashString = `${salt}|${status}|||||||||||${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
     const computedHash = crypto.createHash('sha512').update(hashString).digest('hex');
 
@@ -27,6 +28,9 @@ export async function POST(req: NextRequest) {
 
     if (receivedHash !== computedHash) {
         console.error("Payment callback hash mismatch!");
+        console.log("Expected hash string:", hashString);
+        console.log("Received hash:", receivedHash);
+        console.log("Computed hash:", computedHash);
         redirectUrl.searchParams.set('status', 'ERROR');
         redirectUrl.searchParams.set('reason', 'Hash mismatch');
         return NextResponse.redirect(redirectUrl);
@@ -34,9 +38,11 @@ export async function POST(req: NextRequest) {
     
     if (status === 'success') {
       console.log(`Payment successful for txnid: ${txnid}`);
+      // Here you would typically update your database (e.g., Firestore) to mark the order as "PAID".
       redirectUrl.searchParams.set('status', 'SUCCESS');
     } else {
       console.log(`Payment failed for txnid: ${txnid}. Status: ${status}, Error: ${responseData.error_Message}`);
+       // Here you would update your database to mark the order as "FAILED".
       redirectUrl.searchParams.set('status', 'FAILED');
     }
 
