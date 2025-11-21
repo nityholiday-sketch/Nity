@@ -41,12 +41,12 @@ interface PackageDetailsClientProps {
 const PaymentFormSchema = z.object({
   name: z.string().min(2, { message: "Name is required." }),
   email: z.string().email({ message: "A valid email is required." }),
-  phone: z.string().regex(/^[0-9]{10}$/, { message: "Must be a 10-digit mobile number." }),
+  phone: z.string().regex(/^[0-9]{10,15}$/, { message: "Must be a valid mobile number." }),
   street: z.string().min(5, { message: "Street address is required." }),
   city: z.string().min(2, { message: "City is required." }),
   state: z.string().min(2, { message: "State is required." }),
   postalCode: z.string().min(5, { message: "Postal code is required." }),
-  country: z.string().min(2, { message: "Country code is required (e.g., SA)." }),
+  country: z.string().length(2, { message: "Must be a 2-letter country code (e.g., IN)." }),
   paymentOption: z.enum(["full", "custom"]),
   customAmount: z.string().optional().transform(e => e === "" || e === undefined ? 0 : parseFloat(e)),
 }).refine(data => {
@@ -74,7 +74,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
       city: "",
       state: "",
       postalCode: "",
-      country: "SA",
+      country: "IN",
       paymentOption: "full",
       customAmount: 0,
     }
@@ -251,7 +251,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                     <DialogContent className="sm:max-w-[480px]">
                       <DialogHeader>
                         <DialogTitle className="text-2xl font-bold text-center">Complete Your Booking</DialogTitle>
-                         <DialogDescription>
+                         <DialogDescription id="payment-dialog-description">
                             Enter your details and payment information to finalize your booking. Our team will contact you to confirm the booking after payment.
                         </DialogDescription>
                       </DialogHeader>
@@ -326,7 +326,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                                 <FormField control={form.control} name="country" render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Country Code</FormLabel>
-                                        <FormControl><Input placeholder="SA" {...field} /></FormControl>
+                                        <FormControl><Input placeholder="IN for India" {...field} /></FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )} />
