@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       amount: amountStr,
       currency: CURRENCY,
       order: {
-        orderId: trackId, // Use the same trackId
+        orderId: trackId, // Use the same trackId as signature
         description: "Purchase of product XYZ" // Static like curl for now
       },
       customer: {
@@ -108,13 +108,23 @@ export async function POST(req: NextRequest) {
     console.log("Raw gateway response:", responseText);
     console.log("Response status:", gatewayRes.status);
 
+    if (!gatewayRes.ok) {
+        console.error("Gateway HTTP error:", gatewayRes.status, responseText);
+        return NextResponse.json({
+            success: false,
+            error: `Gateway returned HTTP status ${gatewayRes.status}`
+        }, {
+            status: gatewayRes.status
+        });
+    }
+    
     let gatewayJson;
     try {
       gatewayJson = JSON.parse(responseText);
     } catch (e) {
       console.error("Failed to parse gateway response:", e);
       return NextResponse.json(
-        { success: false, error: "Invalid response from gateway", raw: responseText },
+        { success: false, error: "Invalid JSON response from gateway", raw: responseText },
         { status: 502 }
       );
     }
@@ -125,7 +135,7 @@ export async function POST(req: NextRequest) {
     const paymentLink = gatewayJson.paymentLink?.linkUrl;
     const transactionId = gatewayJson.transactionId;
 
-    // Check for successful response codes
+    // Check for successful response codes from VegaaH
     if (responseCode !== "001" && responseCode !== "000") {
       console.error("Gateway error - Response code:", responseCode);
       return NextResponse.json(
@@ -146,7 +156,7 @@ export async function POST(req: NextRequest) {
           error: "Payment link not received from gateway",
           raw: gatewayJson,
         },
-        { status: 400 }
+        { status: 500 }
       );
     }
 
