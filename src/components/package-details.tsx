@@ -50,7 +50,8 @@ const PaymentFormSchema = z.object({
 }).refine(data => {
     if (data.paymentOption === 'custom') {
         const amount = parseFloat(data.customAmount || '0');
-        return amount > 0;
+        // Ensure custom amount is at least 1, or some minimum value
+        return amount >= 1;
     }
     return true;
 }, {
@@ -102,7 +103,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
         const paymentData = {
             orderId: orderId,
             packageName: pkg.name,
-            amount: amount,
+            amount: Number(amount.toFixed(2)),
             customerName: values.name,
             customerEmail: values.email,
             customerMobile: values.phone,
@@ -440,4 +441,3 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
     </>
   );
 }
-
