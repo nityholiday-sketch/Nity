@@ -38,13 +38,14 @@ export async function POST(req: NextRequest) {
     } = body;
 
     // Validate required fields
-    if (!orderId || !amount || !customerEmail) {
+    if (!orderId || !amount) {
       return NextResponse.json(
-        { success: false, error: "Missing required fields: orderId, amount, or customerEmail" },
+        { success: false, error: "Missing required fields: orderId or amount" },
         { status: 400 }
       );
     }
 
+    // Use orderId as trackId - keep it simple like curl
     const trackId = orderId;
     const amountStr = Number(amount).toFixed(2);
 
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
 
     const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/vegaah/callback`;
 
-    // Match the exact structure from your working curl request
+    // EXACTLY match your working curl structure
     const payRequestBody = {
       terminalId: TERMINAL_ID,
       password: PASSWORD,
@@ -68,28 +69,26 @@ export async function POST(req: NextRequest) {
       amount: amountStr,
       currency: CURRENCY,
       order: {
-        orderId: orderId,
-        description: packageName || "Tour booking",
+        orderId: trackId, // Use the same trackId
+        description: "Purchase of product XYZ" // Static like curl for now
       },
       customer: {
-        customerEmail: customerEmail || "",
-        billingAddressStreet: billingAddress?.street || "R.B. Street",
-        billingAddressCity: billingAddress?.city || "MUMBAI",
-        billingAddressState: billingAddress?.state || "MAHARASHTRA",
-        billingAddressPostalCode: billingAddress?.postalCode || "400075",
-        billingAddressCountry: billingAddress?.country || "IN",
+        customerEmail: "", // Empty like working curl
+        billingAddressStreet: "R.B. Street", // Static defaults like curl
+        billingAddressCity: "MUMBAI",
+        billingAddressState: "MAHARASHTRA",
+        billingAddressPostalCode: "400075",
+        billingAddressCountry: "IN"
       },
       additionalDetails: {
+        // Exact format from working curl
         userData: JSON.stringify({
           entryone: "abc",
           entrytwo: "def",
           entrythree: "xyz",
-          customerName: customerName || "",
-          customerMobile: customerMobile || "",
-          packageName: packageName || "",
-          receiptUrl: callbackUrl,
-        }),
-      },
+          receiptUrl: callbackUrl
+        })
+      }
     };
 
     console.log("=== VegaaH Request Debug ===");
@@ -107,6 +106,7 @@ export async function POST(req: NextRequest) {
 
     const responseText = await gatewayRes.text();
     console.log("Raw gateway response:", responseText);
+    console.log("Response status:", gatewayRes.status);
 
     let gatewayJson;
     try {
@@ -127,6 +127,7 @@ export async function POST(req: NextRequest) {
 
     // Check for successful response codes
     if (responseCode !== "001" && responseCode !== "000") {
+      console.error("Gateway error - Response code:", responseCode);
       return NextResponse.json(
         {
           success: false,
