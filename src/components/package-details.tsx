@@ -97,7 +97,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
     setError(null);
 
     const amount = values.paymentOption === 'full' ? pkg.price : parseFloat(values.customAmount || '0');
-    const orderId = `NITY_${Date.now()}`;
+    const orderId = Date.now().toString().slice(-6);
 
     try {
         const paymentData = {
