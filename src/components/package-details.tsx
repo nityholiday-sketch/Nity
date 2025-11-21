@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { Clock, Plane, Train, Bus, AlertCircle, CheckCircle, XCircle, CreditCard, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,6 +80,16 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
   });
 
   const paymentOption = form.watch("paymentOption");
+  const customAmountValue = form.watch("customAmount");
+
+  const amountToPay = useMemo(() => {
+    if (paymentOption === 'full') {
+        return pkg.price;
+    }
+    const customAmount = parseFloat(customAmountValue || '0');
+    return customAmount > 0 ? customAmount : 0;
+  }, [paymentOption, customAmountValue, pkg.price]);
+
 
   async function handlePayment(values: z.infer<typeof PaymentFormSchema>) {
     setIsProcessing(true);
@@ -91,8 +101,8 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
     try {
         const paymentData = {
             orderId: orderId,
-            amount: amount,
             packageName: pkg.name,
+            amount: amount,
             customerName: values.name,
             customerEmail: values.email,
             customerMobile: values.phone,
@@ -117,19 +127,11 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
 
         console.log('API Response status:', response.status);
 
-        let result;
-        try {
-          result = await response.json();
-        } catch (parseError) {
-          console.error('Failed to parse API response:', parseError);
-          const responseText = await response.text();
-          console.error('Raw response text:', responseText);
-          throw new Error('Invalid response from server');
-        }
-
+        const result = await response.json();
+        
         console.log('API Response data:', result);
 
-        if (!result || !result.success) {
+        if (!result.success) {
             throw new Error(result.error || 'Payment initiation failed');
         }
 
@@ -147,21 +149,10 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
     }
   }
 
-  const getAmountToPay = () => {
-    const option = form.getValues("paymentOption");
-    if (option === 'full') {
-        return pkg.price;
-    }
-    const customAmount = parseFloat(form.getValues("customAmount") || '0');
-    return customAmount > 0 ? customAmount : 0;
-  }
-
-
   return (
     <>
     <div className="py-12">
       <div className="container mx-auto px-4 md:px-6">
-        {/* Header Section */}
         <div className="relative mb-8 h-64 md:h-96 w-full overflow-hidden rounded-lg">
           <Image
             src={pkg.image}
@@ -180,7 +171,6 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Main Content */}
           <div className="lg:col-span-2">
             <h2 className="font-headline text-2xl font-bold">About this tour</h2>
             <p className="mt-4 text-muted-foreground">{pkg.description}</p>
@@ -225,7 +215,6 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
             </div>
           </div>
 
-          {/* Sidebar */}
           <div>
             <Card>
               <CardHeader>
@@ -361,7 +350,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                                 <FormField control={form.control} name="country" render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Country Code</FormLabel>
-                                        <FormControl><Input placeholder="IN" {...field} /></FormControl>
+                                        <FormControl><Input placeholder="IN" {...field} defaultValue="IN" /></FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )} />
@@ -429,7 +418,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                                       Processing...
                                     </span>
                                   ) : (
-                                    `Pay Now: ₹${getAmountToPay() > 0 ? getAmountToPay().toLocaleString() : ''}`
+                                    `Pay Now: ₹${amountToPay > 0 ? amountToPay.toLocaleString() : ''}`
                                   )}
                               </Button>
                             </div>
@@ -451,3 +440,4 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
     </>
   );
 }
+
