@@ -103,16 +103,18 @@ export async function POST(request: NextRequest) {
         description: `Booking for ${packageName}`
       },
       customer: {
-        customerName: customerName,
         customerEmail,
-        customerMobile: customerMobile,
         billingAddressStreet: billingAddress?.street || 'Not Provided',
         billingAddressCity: billingAddress?.city || 'Not Provided',
         billingAddressState: billingAddress?.state || 'Not Provided',
         billingAddressPostalCode: billingAddress?.postalCode || '00000',
         billingAddressCountry: billingAddress?.country || 'IN'
       },
-      callbackUrl: callbackUrl,
+      additionalDetails: {
+        userData: JSON.stringify({
+            receiptUrl: callbackUrl
+        })
+      }
     };
 
     console.log('VegaaH Request Payload:', JSON.stringify(payload, null, 2));
