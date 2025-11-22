@@ -29,11 +29,10 @@ export async function POST(req: NextRequest) {
 
     const {
       orderId,
-      amount,
     } = body;
 
     // Validate required fields
-    if (!orderId || !amount) {
+    if (!orderId || !body.amount) {
       return NextResponse.json(
         { success: false, error: "Missing required fields: orderId or amount" },
         { status: 400 }
@@ -41,7 +40,7 @@ export async function POST(req: NextRequest) {
     }
 
     const trackId = orderId;
-    const amountStr = Number(amount).toFixed(2);
+    const amountStr = Number(body.amount).toFixed(2);
 
     const signature = generateVegaahSignature({
       trackId,
@@ -63,7 +62,7 @@ export async function POST(req: NextRequest) {
       amount: amountStr,
       currency: CURRENCY,
       order: {
-        orderId: trackId, // Use the same trackId as signature generation
+        orderId: trackId, // Use the same trackId
         description: "Purchase of product XYZ" // Static value from working curl
       },
       customer: {
@@ -84,11 +83,22 @@ export async function POST(req: NextRequest) {
         })
       }
     };
+    
+    const signatureInput = `${trackId}|${TERMINAL_ID}|${PASSWORD}|${MERCHANT_KEY}|${amountStr}|${CURRENCY}`;
 
     console.log("=== VegaaH Request Debug ===");
-    console.log("Signature input:", `${trackId}|${TERMINAL_ID}|${PASSWORD}|${MERCHANT_KEY}|${amountStr}|${CURRENCY}`);
+    console.log("Signature input:", signatureInput);
     console.log("Generated signature:", signature);
     console.log("Request body:", JSON.stringify(payRequestBody, null, 2));
+    
+    if (process.env.NODE_ENV !== "production") {
+      return NextResponse.json({
+        debug: true,
+        signatureInput,
+        signature,
+        payRequestBody,
+      });
+    }
 
     const gatewayRes = await fetch(VEGAH_URL, {
       method: "POST",
