@@ -29,10 +29,16 @@ export async function POST(req: NextRequest) {
 
     const {
       orderId,
+      packageName,
+      amount,
+      customerName,
+      customerEmail,
+      customerMobile,
+      billingAddress,
     } = body;
 
     // Validate required fields
-    if (!orderId || !body.amount) {
+    if (!orderId || !amount) {
       return NextResponse.json(
         { success: false, error: "Missing required fields: orderId or amount" },
         { status: 400 }
@@ -40,7 +46,7 @@ export async function POST(req: NextRequest) {
     }
 
     const trackId = orderId;
-    const amountStr = Number(body.amount).toFixed(2);
+    const amountStr = Number(amount).toFixed(2);
 
     const signature = generateVegaahSignature({
       trackId,
@@ -53,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/vegaah/callback`;
 
-    // EXACTLY match your working curl structure
+    // Build the request body dynamically using data from the frontend
     const payRequestBody = {
       terminalId: TERMINAL_ID,
       password: PASSWORD,
@@ -62,23 +68,22 @@ export async function POST(req: NextRequest) {
       amount: amountStr,
       currency: CURRENCY,
       order: {
-        orderId: trackId, // Use the same trackId
-        description: "Purchase of product XYZ" // Static value from working curl
+        orderId: trackId, 
+        description: packageName || "Tour booking"
       },
       customer: {
-        customerEmail: "", // Empty like working curl
-        billingAddressStreet: "R.B. Street", // Static defaults from working curl
-        billingAddressCity: "MUMBAI",
-        billingAddressState: "MAHARASHTRA",
-        billingAddressPostalCode: "400075",
-        billingAddressCountry: "IN"
+        customerEmail: customerEmail || "",
+        billingAddressStreet: billingAddress?.street || "R.B. Street",
+        billingAddressCity: billingAddress?.city || "MUMBAI",
+        billingAddressState: billingAddress?.state || "MAHARASHTRA",
+        billingAddressPostalCode: billingAddress?.postalCode || "400075",
+        billingAddressCountry: billingAddress?.country || "IN"
       },
       additionalDetails: {
-        // Exact format from working curl
         userData: JSON.stringify({
-          entryone: "abc",
-          entrytwo: "def",
-          entrythree: "xyz",
+          customerName: customerName || "",
+          customerMobile: customerMobile || "",
+          packageName: packageName || "",
           receiptUrl: callbackUrl
         })
       }
@@ -92,12 +97,12 @@ export async function POST(req: NextRequest) {
     console.log("Request body:", JSON.stringify(payRequestBody, null, 2));
     
     if (process.env.NODE_ENV !== "production") {
-      return NextResponse.json({
-        debug: true,
-        signatureInput,
-        signature,
-        payRequestBody,
-      });
+      // return NextResponse.json({
+      //   debug: true,
+      //   signatureInput,
+      //   signature,
+      //   payRequestBody,
+      // });
     }
 
     const gatewayRes = await fetch(VEGAH_URL, {
@@ -112,16 +117,6 @@ export async function POST(req: NextRequest) {
     console.log("Raw gateway response:", responseText);
     console.log("Response status:", gatewayRes.status);
 
-    if (!gatewayRes.ok) {
-        console.error("Gateway HTTP error:", gatewayRes.status, responseText);
-        return NextResponse.json({
-            success: false,
-            error: `Gateway returned HTTP status ${gatewayRes.status}`
-        }, {
-            status: gatewayRes.status
-        });
-    }
-    
     let gatewayJson;
     try {
       gatewayJson = JSON.parse(responseText);
