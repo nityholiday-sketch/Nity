@@ -40,7 +40,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Use orderId as trackId - keep it simple like curl
     const trackId = orderId;
     const amountStr = Number(amount).toFixed(2);
 
