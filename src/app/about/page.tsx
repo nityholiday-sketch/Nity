@@ -165,14 +165,14 @@ export default function AboutPage() {
                                 <Landmark className="h-5 w-5 mr-3 mt-1 text-primary flex-shrink-0" />
                                 <div>
                                     <span className="font-semibold text-foreground">Address:</span>
-                                    <p>Nitytravletodream llp 34 opp bank of baroda BHINMAL</p>
+                                    <p>Nitytravletodream llp 34 opp bank of baroda</p>
                                 </div>
                             </li>
                              <li className="flex items-start">
                                 <Phone className="h-5 w-5 mr-3 mt-1 text-primary flex-shrink-0" />
                                 <div>
                                     <span className="font-semibold text-foreground">Contact:</span>
-                                    <p>+91 9785798008</p>
+                                    <p>+918460549415</p>
                                 </div>
                             </li>
                              <li className="flex items-start">
@@ -191,5 +191,3 @@ export default function AboutPage() {
     </div>
   );
 }
-
-    

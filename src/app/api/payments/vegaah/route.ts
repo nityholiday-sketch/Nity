@@ -1,14 +1,17 @@
+// app/api/payments/vegaah/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
+const APP_URL      = process.env.NEXT_PUBLIC_APP_URL!;  // e.g. https://nityholiday.com
 const TERMINAL_ID  = process.env.VEGAAH_TERMINAL_ID!;
 const PASSWORD     = process.env.VEGAAH_PASSWORD!;
 const MERCHANT_KEY = process.env.VEGAAH_MERCHANT_KEY!;
 const CURRENCY     = "INR";
 
+// TODO: change to live URL in production
 const VEGAH_URL =
-  "https://test-vegaah.concertosoft.com/vegaahpayments/v2/payments/pay-request";
+  "https://checkout.vegaah.com/vegaahpayments/v2/payments/pay-request";
 
 function generateVegaahSignature(params: {
   trackId: string;
@@ -29,15 +32,14 @@ export async function POST(req: NextRequest) {
 
     const {
       orderId,
-      packageName,
       amount,
+      packageName,
       customerName,
       customerEmail,
       customerMobile,
       billingAddress,
     } = body;
 
-    // Validate required fields
     if (!orderId || !amount) {
       return NextResponse.json(
         { success: false, error: "Missing required fields: orderId or amount" },
@@ -45,7 +47,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const trackId = orderId;
+    const trackId   = orderId.toString();
     const amountStr = Number(amount).toFixed(2);
 
     const signature = generateVegaahSignature({
@@ -57,9 +59,11 @@ export async function POST(req: NextRequest) {
       currency: CURRENCY,
     });
 
-    const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/vegaah/callback`;
+    // URL that will SHOW the result to the user (your React page)
+    const frontReturnUrl = `${APP_URL}/payment-status`;
+    // URL that will RECEIVE the encrypted final response from VegaaH
+    const callbackUrl    = `${APP_URL}/api/payments/vegaah/callback`;
 
-    // Build the request body dynamically using data from the frontend
     const payRequestBody = {
       terminalId: TERMINAL_ID,
       password: PASSWORD,
@@ -68,48 +72,44 @@ export async function POST(req: NextRequest) {
       amount: amountStr,
       currency: CURRENCY,
       order: {
-        orderId: trackId, 
-        description: packageName || "Tour booking"
+        orderId: trackId,
+        description: packageName || "Nity Holiday Tour Package",
       },
       customer: {
         customerEmail: customerEmail || "",
+        customerName: customerName || "",
+        customerMobile: customerMobile || "",
         billingAddressStreet: billingAddress?.street || "R.B. Street",
         billingAddressCity: billingAddress?.city || "MUMBAI",
         billingAddressState: billingAddress?.state || "MAHARASHTRA",
         billingAddressPostalCode: billingAddress?.postalCode || "400075",
-        billingAddressCountry: billingAddress?.country || "IN"
+        billingAddressCountry: billingAddress?.country || "IN",
       },
       additionalDetails: {
+        // Vegaah doc: merchant final response is posted to "receiptUrl"
         userData: JSON.stringify({
-          customerName: customerName || "",
-          customerMobile: customerMobile || "",
-          packageName: packageName || "",
-          receiptUrl: callbackUrl
-        })
-      }
+          entryone: "abc",
+          entrytwo: "def",
+          entrythree: "xyz",
+          receiptUrl: callbackUrl,    // 👈 THIS is where VegaaH will POST final encrypted data
+          frontReturnUrl,             // optional info for yourself
+        }),
+      },
     };
-    
-    const signatureInput = `${trackId}|${TERMINAL_ID}|${PASSWORD}|${MERCHANT_KEY}|${amountStr}|${CURRENCY}`;
 
     console.log("=== VegaaH Request Debug ===");
-    console.log("Signature input:", signatureInput);
+    console.log(
+      "Signature input:",
+      `${trackId}|${TERMINAL_ID}|${PASSWORD}|${MERCHANT_KEY}|${amountStr}|${CURRENCY}`
+    );
     console.log("Generated signature:", signature);
+    console.log("Callback URL:", callbackUrl);
+    console.log("Front Return URL:", frontReturnUrl);
     console.log("Request body:", JSON.stringify(payRequestBody, null, 2));
-    
-    if (process.env.NODE_ENV !== "production") {
-      // return NextResponse.json({
-      //   debug: true,
-      //   signatureInput,
-      //   signature,
-      //   payRequestBody,
-      // });
-    }
 
     const gatewayRes = await fetch(VEGAH_URL, {
       method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payRequestBody),
     });
 
@@ -117,7 +117,15 @@ export async function POST(req: NextRequest) {
     console.log("Raw gateway response:", responseText);
     console.log("Response status:", gatewayRes.status);
 
-    let gatewayJson;
+    if (!gatewayRes.ok) {
+      console.error("Gateway HTTP error:", gatewayRes.status, responseText);
+      return NextResponse.json(
+        { success: false, error: `Gateway returned HTTP status ${gatewayRes.status}` },
+        { status: gatewayRes.status }
+      );
+    }
+
+    let gatewayJson: any;
     try {
       gatewayJson = JSON.parse(responseText);
     } catch (e) {
@@ -130,18 +138,17 @@ export async function POST(req: NextRequest) {
 
     console.log("Parsed gateway response:", gatewayJson);
 
-    const responseCode = gatewayJson.responseCode;
-    const paymentLink = gatewayJson.paymentLink?.linkUrl;
+    const responseCode  = gatewayJson.responseCode;
+    const paymentLink   = gatewayJson.paymentLink?.linkUrl;
     const transactionId = gatewayJson.transactionId;
 
-    // Check for successful response codes from VegaaH
     if (responseCode !== "001" && responseCode !== "000") {
       console.error("Gateway error - Response code:", responseCode, gatewayJson.responseDescription);
       return NextResponse.json(
         {
           success: false,
           error: gatewayJson.responseDescription || "Payment initiation failed",
-          responseCode: responseCode,
+          responseCode,
           raw: gatewayJson,
         },
         { status: 400 }
@@ -150,11 +157,7 @@ export async function POST(req: NextRequest) {
 
     if (!paymentLink) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Payment link not received from gateway",
-          raw: gatewayJson,
-        },
+        { success: false, error: "Payment link not received from gateway", raw: gatewayJson },
         { status: 500 }
       );
     }
@@ -163,11 +166,13 @@ export async function POST(req: NextRequest) {
       ? `${paymentLink}${transactionId}`
       : paymentLink;
 
+    console.log("Redirect URL for payment:", redirectUrl);
+
     return NextResponse.json({
       success: true,
       paymentLink: redirectUrl,
-      transactionId: transactionId,
-      trackId: trackId,
+      transactionId,
+      trackId,
       raw: gatewayJson,
     });
   } catch (err: any) {

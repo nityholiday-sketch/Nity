@@ -1,80 +1,86 @@
-'use client';
+"use client";
 
-import { useSearchParams } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import React, { Suspense } from 'react';
+import { Suspense, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
+
+// Tell Next.js this page is dynamic (no static prerender at build time)
+export const dynamic = "force-dynamic";
 
 function PaymentStatusContent() {
   const searchParams = useSearchParams();
-  const status = searchParams.get('status');
-  const txnId = searchParams.get('txnId');
 
-  const renderStatus = () => {
-    switch (status) {
-      case 'SUCCESS':
-        return {
-          icon: <CheckCircle className="h-16 w-16 text-green-500" />,
-          title: 'Payment Successful!',
-          description: 'Thank you for your booking. Our team will contact you shortly to confirm the details.',
-          color: 'text-green-500',
-        };
-      case 'ABORTED':
-        return {
-          icon: <AlertTriangle className="h-16 w-16 text-yellow-500" />,
-          title: 'Payment Aborted',
-          description: 'The payment process was cancelled. You can try booking again.',
-           color: 'text-yellow-500',
-        };
-      case 'FAILED':
-         return {
-          icon: <XCircle className="h-16 w-16 text-destructive" />,
-          title: 'Payment Failed',
-          description: 'Unfortunately, your payment could not be processed. Please try again or use a different payment method.',
-          color: 'text-destructive',
-        };
-      default:
-        return {
-          icon: <AlertTriangle className="h-16 w-16 text-muted-foreground" />,
-          title: 'Unknown Status',
-          description: 'An unexpected error occurred, or the payment status is unknown. Please contact support.',
-           color: 'text-muted-foreground',
-        };
+  const status = searchParams?.get("status") || "";
+  const rawReason = searchParams?.get("reason") || "";
+  const txnId = searchParams?.get("txnId") || "";
+
+  const isSuccess = useMemo(
+    () => status.toUpperCase() === "SUCCESS",
+    [status]
+  );
+
+  // Safely decode reason (avoid crashing if encoded weirdly)
+  let reason = "";
+  if (rawReason) {
+    try {
+      reason = decodeURIComponent(rawReason);
+    } catch {
+      reason = rawReason;
     }
-  };
-
-  const { icon, title, description, color } = renderStatus();
+  }
 
   return (
-    <div className="container mx-auto flex min-h-[60vh] items-center justify-center py-12">
-      <Card className="w-full max-w-md text-center shadow-lg">
-        <CardHeader className="items-center">
-          {icon}
-          <CardTitle className={`text-2xl font-bold ${color}`}>{title}</CardTitle>
-          <CardDescription className="text-base">{description}</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-md p-8">
+        <h1 className="text-2xl font-bold mb-4 text-center">
+          {isSuccess ? "Payment Successful 🎉" : "Payment Status"}
+        </h1>
+
+        <div className="space-y-2 text-sm text-slate-700">
+          <p>
+            <span className="font-semibold">Status:</span>{" "}
+            <span className={isSuccess ? "text-green-600" : "text-red-600"}>
+              {status || "UNKNOWN"}
+            </span>
+          </p>
+
           {txnId && (
-            <div className="mb-6 rounded-md bg-secondary p-3 text-sm">
-              <p className="text-muted-foreground">Your Transaction ID:</p>
-              <p className="font-mono font-semibold">{txnId}</p>
-            </div>
+            <p>
+              <span className="font-semibold">Transaction ID:</span> {txnId}
+            </p>
           )}
-          <Button asChild>
-            <Link href="/packages">Back to Packages</Link>
-          </Button>
-        </CardContent>
-      </Card>
+
+          {reason && (
+            <p>
+              <span className="font-semibold">Reason:</span> {reason}</p>
+          )}
+        </div>
+
+        <button
+          onClick={() => (window.location.href = "/")}
+          className="mt-6 w-full h-10 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
+        >
+          Back to Home
+        </button>
+      </div>
     </div>
   );
 }
 
 export default function PaymentStatusPage() {
-    return (
-        <Suspense fallback={<div className="container mx-auto flex min-h-[60vh] items-center justify-center py-12">Loading payment status...</div>}>
-            <PaymentStatusContent />
-        </Suspense>
-    )
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+          <div className="max-w-md w-full bg-white rounded-2xl shadow-md p-8 text-center">
+            <h1 className="text-xl font-semibold mb-2">Loading payment status…</h1>
+            <p className="text-sm text-slate-600">
+              Please wait while we confirm your transaction.
+            </p>
+          </div>
+        </div>
+      }
+    >
+      <PaymentStatusContent />
+    </Suspense>
+  );
 }

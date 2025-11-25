@@ -145,8 +145,8 @@ export default function PrivacyPolicyPage() {
             Name: Bhupesh Bohara<br/>
             Designation: CEO<br/>
             Company: NITYTRAVELTODREAM LLP<br/>
-            Address: Nitytravletodream llp 34 opp bank of baroda BHINMAL<br/>
-            Contact Number: +91 9785798008<br/>
+            Address: Nitytravletodream llp 34 opp bank of baroda<br/>
+            Contact Number: +918460549415<br/>
             Timings: Monday to Friday (9:00 AM – 6:00 PM)<br/>
             Email ID: info@nityholiday.com
           </p>
@@ -155,5 +155,3 @@ export default function PrivacyPolicyPage() {
     </div>
   );
 }
-
-    
