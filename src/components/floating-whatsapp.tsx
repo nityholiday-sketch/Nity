@@ -19,7 +19,7 @@ const WhatsAppIcon = () => (
 
 
 export default function FloatingWhatsapp() {
-  const phoneNumber = "9785798008"; // Replace with your WhatsApp number
+  const phoneNumber = "918460549415"; // Replace with your WhatsApp number
   const message = "Hello! I'm interested in your tour packages.";
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
@@ -35,5 +35,3 @@ export default function FloatingWhatsapp() {
     </Link>
   );
 }
-
-    
