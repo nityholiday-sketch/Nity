@@ -3,6 +3,7 @@
 
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
+import Script from "next/script";
 import { Clock, Plane, Train, Bus, AlertCircle, CheckCircle, XCircle, CreditCard, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -47,6 +48,9 @@ const PaymentFormSchema = z.object({
     country: z.string().length(2, { message: "Must be a 2-letter country code (e.g., IN)." }),
     paymentOption: z.enum(["full", "custom"]),
     customAmount: z.string().optional(),
+    gateway: z.enum(['vegaah', 'razorpay'], {
+      required_error: "You need to select a payment method.",
+    }),
 }).refine(data => {
     if (data.paymentOption === 'custom') {
         const amount = parseFloat(data.customAmount || '0');
@@ -77,11 +81,13 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
       country: "IN",
       paymentOption: "full",
       customAmount: "0",
+      gateway: undefined,
     }
   });
 
   const paymentOption = form.watch("paymentOption");
   const customAmountValue = form.watch("customAmount");
+  const selectedGateway = form.watch("gateway");
 
   const amountToPay = useMemo(() => {
     if (paymentOption === 'full') {
@@ -92,57 +98,110 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
   }, [paymentOption, customAmountValue, pkg.price]);
 
 
-  async function handlePayment(values: z.infer<typeof PaymentFormSchema>) {
+  async function handleVegaahPayment(values: z.infer<typeof PaymentFormSchema>, amount: number) {
+    const orderId = Date.now().toString().slice(-6);
+    const paymentData = {
+      orderId: orderId,
+      packageName: pkg.name,
+      amount: Number(amount.toFixed(2)),
+      customerName: values.name,
+      customerEmail: values.email,
+      customerMobile: values.phone,
+      billingAddress: {
+        street: values.street,
+        city: values.city,
+        state: values.state,
+        postalCode: values.postalCode,
+        country: values.country,
+      },
+    };
+    
+    const response = await fetch('/api/payments/vegaah', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(paymentData),
+    });
+
+    const result = await response.json();
+
+    if (!result.success || !result.paymentLink) {
+      throw new Error(result.error || 'Vegaah gateway rejected payment initiation');
+    }
+    window.location.href = result.paymentLink;
+  }
+  
+  async function handleRazorpayPayment(values: z.infer<typeof PaymentFormSchema>, amount: number) {
+      // 1. Create Order on server
+      const createOrderResponse = await fetch('/api/payments/razorpay/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount }),
+      });
+  
+      const orderData = await createOrderResponse.json();
+  
+      if (!orderData.success) {
+        throw new Error(orderData.error || "Failed to create Razorpay order.");
+      }
+  
+      // 2. Open Razorpay Checkout
+      const options = {
+        key: orderData.key_id,
+        amount: orderData.amount,
+        currency: "INR",
+        name: "NITY TRAVEL TO DREAM LLP",
+        description: `Booking for ${pkg.name}`,
+        order_id: orderData.orderId,
+        handler: async function (response: any) {
+          // 3. Verify Payment on server
+          const verifyResponse = await fetch('/api/payments/razorpay/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+            }),
+          });
+
+          // Server will redirect on its own to success/failure page
+          if(verifyResponse.ok && verifyResponse.redirected){
+             window.location.href = verifyResponse.url;
+          } else {
+             const errorResult = await verifyResponse.json();
+             setError(errorResult.error || "Payment verification failed. Please contact support.")
+          }
+        },
+        prefill: {
+          name: values.name,
+          email: values.email,
+          contact: values.phone,
+        },
+        theme: {
+          color: "#013220", // Matches primary color
+        },
+      };
+      
+      // @ts-ignore
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+  }
+
+
+  async function onSubmit(values: z.infer<typeof PaymentFormSchema>) {
     setIsProcessing(true);
     setError(null);
 
     const amount = values.paymentOption === 'full' ? pkg.price : parseFloat(values.customAmount || '0');
-    const orderId = Date.now().toString().slice(-6);
 
     try {
-        const paymentData = {
-            orderId: orderId,
-            packageName: pkg.name,
-            amount: Number(amount.toFixed(2)),
-            customerName: values.name,
-            customerEmail: values.email,
-            customerMobile: values.phone,
-            billingAddress: {
-                street: values.street,
-                city: values.city,
-                state: values.state,
-                postalCode: values.postalCode,
-                country: values.country
-            }
-        };
-
-        console.log('Initiating payment with data:', paymentData);
-        
-        const response = await fetch('/api/payments/vegaah', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(paymentData)
-        });
-
-        console.log('API Response status:', response.status);
-
-        const result = await response.json();
-        
-        console.log('API Response data:', result);
-
-        if (!result.success) {
-            throw new Error(result.error || 'Gateway rejected payment initiation');
-        }
-
-        if (result.paymentLink) {
-            console.log('Redirecting to payment link:', result.paymentLink);
-            window.location.href = result.paymentLink;
+        if (values.gateway === 'vegaah') {
+            await handleVegaahPayment(values, amount);
+        } else if (values.gateway === 'razorpay') {
+            await handleRazorpayPayment(values, amount);
         } else {
-            throw new Error('Payment link not received from gateway');
+            throw new Error("Please select a payment gateway.");
         }
-
     } catch (error: any) {
         console.error('Payment Error:', error);
         setError(error.message || 'Failed to initiate payment. Please try again.');
@@ -152,6 +211,10 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
 
   return (
     <>
+    <Script
+        id="razorpay-checkout-js"
+        src="https://checkout.razorpay.com/v1/checkout.js"
+      />
     <div className="py-12">
       <div className="container mx-auto px-4 md:px-6">
         <div className="relative mb-8 h-64 md:h-96 w-full overflow-hidden rounded-lg">
@@ -252,7 +315,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                     <CardTitle className="font-headline">Book This Tour</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Dialog onOpenChange={() => setError(null)}>
+                  <Dialog onOpenChange={() => {setError(null); form.reset()}}>
                     <DialogTrigger asChild>
                        <Button className="w-full">
                         <CreditCard className="mr-2 h-4 w-4" />
@@ -291,99 +354,35 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                         )}
 
                         <Form {...form}>
-                          <form onSubmit={form.handleSubmit(handlePayment)} className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <FormField control={form.control} name="name" render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Full Name</FormLabel>
-                                        <FormControl><Input placeholder="Your Name" {...field} /></FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )} />
-                                 <FormField control={form.control} name="email" render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Email Address</FormLabel>
-                                        <FormControl><Input placeholder="your.email@example.com" {...field} /></FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}/>
-                            </div>
-                            <FormField control={form.control} name="phone" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Mobile Number</FormLabel>
-                                    <FormControl><Input placeholder="9876543210" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
-                            
-                            <h4 className="text-sm font-medium pt-2">Billing Address</h4>
-                            <FormField control={form.control} name="street" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Street</FormLabel>
-                                    <FormControl><Input placeholder="King Fahd Road" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
-                             <div className="grid grid-cols-2 gap-4">
-                                <FormField control={form.control} name="city" render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>City</FormLabel>
-                                        <FormControl><Input placeholder="Riyadh" {...field} /></FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )} />
-                                <FormField control={form.control} name="state" render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>State</FormLabel>
-                                        <FormControl><Input placeholder="Riyadh" {...field} /></FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )} />
-                             </div>
-                             <div className="grid grid-cols-2 gap-4">
-                                <FormField control={form.control} name="postalCode" render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Postal Code</FormLabel>
-                                        <FormControl><Input placeholder="12345" {...field} /></FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )} />
-                                <FormField control={form.control} name="country" render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Country Code</FormLabel>
-                                        <FormControl><Input placeholder="IN" {...field} /></FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )} />
-                            </div>
+                          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 
                             <FormField
                               control={form.control}
-                              name="paymentOption"
+                              name="gateway"
                               render={({ field }) => (
-                                <FormItem className="space-y-3 pt-4">
-                                  <FormLabel>Payment Option</FormLabel>
+                                <FormItem className="space-y-3">
+                                  <FormLabel>Payment Method</FormLabel>
                                   <FormControl>
                                     <RadioGroup
                                       onValueChange={field.onChange}
                                       defaultValue={field.value}
-                                      className="space-y-2"
+                                      className="grid grid-cols-2 gap-4"
                                     >
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                      <FormItem>
                                         <FormControl>
-                                          <RadioGroupItem value="full" />
+                                            <RadioGroupItem value="vegaah" id="vegaah-radio" className="sr-only" />
                                         </FormControl>
-                                        <FormLabel className="font-normal">
-                                          Pay Full Amount: ₹{pkg.price.toLocaleString()}
-                                        </FormLabel>
+                                        <Label htmlFor="vegaah-radio" className="flex items-center gap-2 border rounded-md p-3 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
+                                            <Image src="https://firebasestorage.googleapis.com/v0/b/nityholiday-adventures.firebasestorage.app/o/vegaah-logo.png?alt=media&token=e9375179-c5d9-4f71-a4e9-4e0c4a4e1a0d" alt="Vegaah" width={80} height={20} />
+                                        </Label>
                                       </FormItem>
-                                      <FormItem className="flex items-center space-x-3 space-y-0">
+                                      <FormItem>
                                         <FormControl>
-                                          <RadioGroupItem value="custom" />
+                                            <RadioGroupItem value="razorpay" id="razorpay-radio" className="sr-only" />
                                         </FormControl>
-                                        <FormLabel className="font-normal">
-                                          Pay a Custom Amount
-                                        </FormLabel>
+                                        <Label htmlFor="razorpay-radio" className="flex items-center gap-2 border rounded-md p-3 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
+                                            <Image src="https://firebasestorage.googleapis.com/v0/b/nityholiday-adventures.firebasestorage.app/o/razorpay-logo.svg?alt=media&token=a86a6e2e-2f22-485a-8b1e-9a10c9789390" alt="Razorpay" width={90} height={20} />
+                                        </Label>
                                       </FormItem>
                                     </RadioGroup>
                                   </FormControl>
@@ -392,37 +391,141 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                               )}
                             />
 
-                            {paymentOption === 'custom' && (
-                              <FormField
-                                control={form.control}
-                                name="customAmount"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Custom Amount</FormLabel>
-                                    <FormControl>
-                                      <Input
-                                        type="number"
-                                        placeholder="Enter advance amount"
-                                        {...field}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
+                            {selectedGateway && (
+                             <>
+                               <div className="grid grid-cols-2 gap-4">
+                                   <FormField control={form.control} name="name" render={({ field }) => (
+                                       <FormItem>
+                                           <FormLabel>Full Name</FormLabel>
+                                           <FormControl><Input placeholder="Your Name" {...field} /></FormControl>
+                                           <FormMessage />
+                                       </FormItem>
+                                   )} />
+                                    <FormField control={form.control} name="email" render={({ field }) => (
+                                       <FormItem>
+                                           <FormLabel>Email Address</FormLabel>
+                                           <FormControl><Input placeholder="your.email@example.com" {...field} /></FormControl>
+                                           <FormMessage />
+                                       </FormItem>
+                                   )}/>
+                               </div>
+                               <FormField control={form.control} name="phone" render={({ field }) => (
+                                   <FormItem>
+                                       <FormLabel>Mobile Number</FormLabel>
+                                       <FormControl><Input placeholder="9876543210" {...field} /></FormControl>
+                                       <FormMessage />
+                                   </FormItem>
+                               )} />
+                               
+                               <h4 className="text-sm font-medium pt-2">Billing Address</h4>
+                               <FormField control={form.control} name="street" render={({ field }) => (
+                                   <FormItem>
+                                       <FormLabel>Street</FormLabel>
+                                       <FormControl><Input placeholder="King Fahd Road" {...field} /></FormControl>
+                                       <FormMessage />
+                                   </FormItem>
+                               )} />
+                                <div className="grid grid-cols-2 gap-4">
+                                   <FormField control={form.control} name="city" render={({ field }) => (
+                                       <FormItem>
+                                           <FormLabel>City</FormLabel>
+                                           <FormControl><Input placeholder="Riyadh" {...field} /></FormControl>
+                                           <FormMessage />
+                                       </FormItem>
+                                   )} />
+                                   <FormField control={form.control} name="state" render={({ field }) => (
+                                       <FormItem>
+                                           <FormLabel>State</FormLabel>
+                                           <FormControl><Input placeholder="Riyadh" {...field} /></FormControl>
+                                           <FormMessage />
+                                       </FormItem>
+                                   )} />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                   <FormField control={form.control} name="postalCode" render={({ field }) => (
+                                       <FormItem>
+                                           <FormLabel>Postal Code</FormLabel>
+                                           <FormControl><Input placeholder="12345" {...field} /></FormControl>
+                                           <FormMessage />
+                                       </FormItem>
+                                   )} />
+                                   <FormField control={form.control} name="country" render={({ field }) => (
+                                       <FormItem>
+                                           <FormLabel>Country Code</FormLabel>
+                                           <FormControl><Input placeholder="IN" {...field} /></FormControl>
+                                           <FormMessage />
+                                       </FormItem>
+                                   )} />
+                               </div>
+
+                               <FormField
+                                 control={form.control}
+                                 name="paymentOption"
+                                 render={({ field }) => (
+                                   <FormItem className="space-y-3 pt-4">
+                                     <FormLabel>Payment Option</FormLabel>
+                                     <FormControl>
+                                       <RadioGroup
+                                         onValueChange={field.onChange}
+                                         defaultValue={field.value}
+                                         className="space-y-2"
+                                       >
+                                         <FormItem className="flex items-center space-x-3 space-y-0">
+                                           <FormControl>
+                                             <RadioGroupItem value="full" />
+                                           </FormControl>
+                                           <FormLabel className="font-normal">
+                                             Pay Full Amount: ₹{pkg.price.toLocaleString()}
+                                           </FormLabel>
+                                         </FormItem>
+                                         <FormItem className="flex items-center space-x-3 space-y-0">
+                                           <FormControl>
+                                             <RadioGroupItem value="custom" />
+                                           </FormControl>
+                                           <FormLabel className="font-normal">
+                                             Pay a Custom Amount
+                                           </FormLabel>
+                                         </FormItem>
+                                       </RadioGroup>
+                                     </FormControl>
+                                     <FormMessage />
+                                   </FormItem>
+                                 )}
+                               />
+
+                               {paymentOption === 'custom' && (
+                                 <FormField
+                                   control={form.control}
+                                   name="customAmount"
+                                   render={({ field }) => (
+                                     <FormItem>
+                                       <FormLabel>Custom Amount</FormLabel>
+                                       <FormControl>
+                                         <Input
+                                           type="number"
+                                           placeholder="Enter advance amount"
+                                           {...field}
+                                         />
+                                       </FormControl>
+                                       <FormMessage />
+                                     </FormItem>
+                                   )}
+                                 />
+                               )}
+                               <div className="mt-6">
+                                 <Button type="submit" className="w-full h-12 text-lg" disabled={isProcessing}>
+                                    {isProcessing ? (
+                                       <span className="flex items-center justify-center">
+                                         <Loader2 className="animate-spin h-5 w-5 mr-2" />
+                                         Processing...
+                                       </span>
+                                     ) : (
+                                       `Pay Now: ₹${amountToPay > 0 ? amountToPay.toLocaleString() : ''}`
+                                     )}
+                                 </Button>
+                               </div>
+                             </>
                             )}
-                            <div className="mt-6">
-                              <Button type="submit" className="w-full h-12 text-lg" disabled={isProcessing}>
-                                 {isProcessing ? (
-                                    <span className="flex items-center justify-center">
-                                      <Loader2 className="animate-spin h-5 w-5 mr-2" />
-                                      Processing...
-                                    </span>
-                                  ) : (
-                                    `Pay Now: ₹${amountToPay > 0 ? amountToPay.toLocaleString() : ''}`
-                                  )}
-                              </Button>
-                            </div>
                           </form>
                         </Form>
                       </div>

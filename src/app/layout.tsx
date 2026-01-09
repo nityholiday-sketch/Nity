@@ -4,6 +4,13 @@ import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import FloatingWhatsapp from '@/components/floating-whatsapp';
 import './globals.css';
+import { Inter } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 const APP_NAME = "Nityholiday";
 const APP_DESCRIPTION = "Explore the world with Nityholiday. We offer personalized tour packages, verified services, and competitive pricing for an unforgettable travel experience.";
@@ -53,12 +60,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-      </head>
+    <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
       <body className="font-body antialiased">
         <div className="flex min-h-screen flex-col">
           <Header />
