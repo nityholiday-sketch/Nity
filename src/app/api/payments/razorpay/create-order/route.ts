@@ -1,6 +1,6 @@
 
 // /app/api/payments/razorpay/create-order/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 
 const KEY_ID = process.env.RAZORPAY_KEY_ID;
@@ -15,7 +15,7 @@ const razorpayInstance = new Razorpay({
   key_secret: KEY_SECRET,
 });
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
     const { amount } = await req.json();
 

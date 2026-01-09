@@ -1,6 +1,6 @@
 
 // /app/api/payments/razorpay/verify/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import crypto from "crypto";
 
 const KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
@@ -10,7 +10,7 @@ if (!KEY_SECRET) {
   throw new Error("Razorpay Key Secret is not configured.");
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = await req.json();
 
