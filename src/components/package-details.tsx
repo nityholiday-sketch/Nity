@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -380,7 +381,10 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                                             <RadioGroupItem value="vegaah" id="vegaah-radio" className="sr-only" />
                                         </FormControl>
                                         <Label htmlFor="vegaah-radio" className="flex items-center justify-center border rounded-md p-3 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary h-20">
-                                            <Image src="https://firebasestorage.googleapis.com/v0/b/nityholiday-adventures.firebasestorage.app/o/vegaah-logo.png?alt=media&token=e9375179-c5d9-4f71-a4e9-4e0c4a4e1a0d" alt="Pay with Vegaah" width={100} height={25} />
+                                          <div className="flex flex-col items-center justify-center w-full h-full gap-2">
+                                            <span className="font-bold text-lg text-gray-700">Vegaah</span>
+                                            <span className="text-xs text-gray-500">Netbanking & Cards</span>
+                                          </div>
                                         </Label>
                                       </FormItem>
                                       <FormItem>
@@ -388,7 +392,14 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                                             <RadioGroupItem value="razorpay" id="razorpay-radio" className="sr-only" />
                                         </FormControl>
                                         <Label htmlFor="razorpay-radio" className="flex items-center justify-center border rounded-md p-3 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary h-20">
-                                            <Image src="https://cdn.razorpay.com/static/assets/logo/payment.svg" alt="Pay with Razorpay" width={110} height={25} />
+                                            <div className="flex flex-col items-center justify-center w-full h-full">
+                                              <img 
+                                                src="https://cdn.razorpay.com/logos/razorpay-logo.svg" 
+                                                alt="Razorpay" 
+                                                style={{ height: '32px', width: 'auto', objectFit: 'contain' }} 
+                                              />
+                                              <span className="text-[10px] text-gray-400 mt-1">UPI, Cards, Netbanking</span>
+                                            </div>
                                         </Label>
                                       </FormItem>
                                     </RadioGroup>
