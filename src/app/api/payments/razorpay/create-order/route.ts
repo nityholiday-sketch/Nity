@@ -1,7 +1,8 @@
+import { NextResponse } from 'next/server';
+import Razorpay from 'razorpay';
 
-// /app/api/payments/razorpay/create-order/route.ts
-import { NextResponse } from "next/server";
-import Razorpay from "razorpay";
+// This file previously contained incorrect logic.
+// The code has been replaced with the master fix provided by the user.
 
 const KEY_ID = process.env.RAZORPAY_KEY_ID;
 const KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;

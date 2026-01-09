@@ -137,6 +137,13 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount }),
       });
+      
+      if (!createOrderResponse.ok) {
+        console.error("Server returned an error:", createOrderResponse.status);
+        const errorText = await createOrderResponse.text();
+        console.error("Server response:", errorText);
+        throw new Error(`Failed to create Razorpay order. Server responded with ${createOrderResponse.status}`);
+      }
   
       const orderData = await createOrderResponse.json();
   
@@ -372,16 +379,16 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                                         <FormControl>
                                             <RadioGroupItem value="vegaah" id="vegaah-radio" className="sr-only" />
                                         </FormControl>
-                                        <Label htmlFor="vegaah-radio" className="flex items-center gap-2 border rounded-md p-3 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
-                                            <Image src="https://firebasestorage.googleapis.com/v0/b/nityholiday-adventures.firebasestorage.app/o/vegaah-logo.png?alt=media&token=e9375179-c5d9-4f71-a4e9-4e0c4a4e1a0d" alt="Vegaah" width={80} height={20} />
+                                        <Label htmlFor="vegaah-radio" className="flex items-center justify-center border rounded-md p-3 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary h-20">
+                                            <Image src="https://firebasestorage.googleapis.com/v0/b/nityholiday-adventures.firebasestorage.app/o/vegaah-logo.png?alt=media&token=e9375179-c5d9-4f71-a4e9-4e0c4a4e1a0d" alt="Pay with Vegaah" width={100} height={25} />
                                         </Label>
                                       </FormItem>
                                       <FormItem>
                                         <FormControl>
                                             <RadioGroupItem value="razorpay" id="razorpay-radio" className="sr-only" />
                                         </FormControl>
-                                        <Label htmlFor="razorpay-radio" className="flex items-center gap-2 border rounded-md p-3 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
-                                            <Image src="https://firebasestorage.googleapis.com/v0/b/nityholiday-adventures.firebasestorage.app/o/razorpay-logo.svg?alt=media&token=a86a6e2e-2f22-485a-8b1e-9a10c9789390" alt="Razorpay" width={90} height={20} />
+                                        <Label htmlFor="razorpay-radio" className="flex items-center justify-center border rounded-md p-3 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary h-20">
+                                            <Image src="https://cdn.razorpay.com/static/assets/logo/payment.svg" alt="Pay with Razorpay" width={110} height={25} />
                                         </Label>
                                       </FormItem>
                                     </RadioGroup>
