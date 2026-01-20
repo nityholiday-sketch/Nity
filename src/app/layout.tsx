@@ -5,6 +5,7 @@ import { Footer } from '@/components/footer';
 import FloatingWhatsapp from '@/components/floating-whatsapp';
 import './globals.css';
 import { Inter } from 'next/font/google';
+import { PaymentSecurityNotice } from '@/components/payment-security-notice';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -71,6 +72,7 @@ export default function RootLayout({
         </div>
         <FloatingWhatsapp />
         <Toaster />
+        <PaymentSecurityNotice />
       </body>
     </html>
   );
