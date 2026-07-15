@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       amount: Math.floor(amount).toString(), // Must be string integer
     };
 
-    console.log('Sending payload to Bharat4U:', { ...payload, bharat_key: '***' });
+    console.log('Initiating Bharat4U Payment with payload:', { ...payload, bharat_key: '***' });
 
     const response = await fetch('https://api.bharat4upe.com/api/payin/v1/create-order', {
       method: 'POST',
@@ -37,17 +37,18 @@ export async function POST(request: Request) {
     const data = await response.json();
 
     if (data.status) {
+      console.log('Bharat4U Success Response:', data);
       return NextResponse.json(data);
     } else {
       // Log the exact error from Bharat4U for debugging
-      console.error('Bharat4U API Error:', data);
+      console.error('Bharat4U API Error Response:', data);
       return NextResponse.json({ 
         error: data.msg || 'Payment initiation failed',
         details: data 
       }, { status: 400 });
     }
   } catch (error: any) {
-    console.error('Internal Server Error:', error);
+    console.error('Internal Server Error in Bharat Payment Route:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
