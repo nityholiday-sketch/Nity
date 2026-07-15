@@ -23,11 +23,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const BookingSchema = z.object({
   name: z.string().min(2, "Name is required"),
-  mobile: z.string().min(10, "Valid mobile number is required").max(10, "10 digits required"),
+  mobile: z.string().regex(/^[6-9]\d{9}$/, "Please enter a valid 10-digit mobile number"),
 });
 
 interface BookingModalProps {
@@ -39,6 +39,7 @@ interface BookingModalProps {
 
 export function BookingModal({ isOpen, onClose, packageName, amount }: BookingModalProps) {
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof BookingSchema>>({
     resolver: zodResolver(BookingSchema),
@@ -48,8 +49,6 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
   async function onSubmit(values: z.infer<typeof BookingSchema>) {
     setLoading(true);
     try {
-      const orderId = `NH${Math.floor(Date.now() / 1000)}${Math.floor(Math.random() * 100)}`;
-      
       const response = await fetch("/api/payments/bharat/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -57,26 +56,25 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
           amount: amount,
           customer_name: values.name,
           customer_mobile: values.mobile,
-          order_id: orderId,
         }),
       });
 
       const result = await response.json();
 
-      if (result.status && result.data?.url) {
-        // Redirect to Bharat4U Payment URL
+      if (response.ok && result.status && result.data?.url) {
         window.location.href = result.data.url;
       } else {
         toast({
-          title: "Payment Error",
-          description: result.error || "Could not initiate payment. Please try again.",
+          title: "Booking Error",
+          description: result.error || "Payment initiation failed. Please try again.",
           variant: "destructive",
         });
+        console.error("Payment API Error:", result);
       }
     } catch (error) {
       toast({
         title: "Connection Error",
-        description: "Failed to connect to payment server.",
+        description: "Failed to connect to the booking server.",
         variant: "destructive",
       });
     } finally {
@@ -126,14 +124,14 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
             <div className="bg-secondary/50 p-4 rounded-lg flex items-start gap-3 mt-4">
               <ShieldCheck className="h-5 w-5 text-green-600 mt-1" />
               <p className="text-xs text-muted-foreground">
-                Your payment is processed securely via Bharat4U. No fraudulent transactions allowed. All payments are non-refundable as per policy.
+                Your payment is processed securely via Bharat4U. Please ensure your mobile number is correct for confirmation.
               </p>
             </div>
             <Button type="submit" className="w-full h-12 text-lg" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Initiating Payment...
+                  Processing...
                 </>
               ) : (
                 "Pay & Confirm Booking"

@@ -10,19 +10,22 @@ export async function POST(request: Request) {
     const BHARAT_MID = "BHARAT906370096";
     const BHARAT_KEY = "MKEY8ON66ORPLUF9";
 
-    // Generate a unique order ID if not provided, ensuring it's not too long
-    const finalOrderId = order_id || `ORD${Math.floor(Date.now() / 1000)}${Math.floor(Math.random() * 1000)}`;
+    // Generate a strictly alphanumeric unique order ID (Max 20 chars for safety)
+    const timestamp = Date.now().toString().slice(-8);
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const finalOrderId = order_id || `ORD${timestamp}${random}`;
 
     const payload = {
       bharat_mid: BHARAT_MID,
       bharat_key: BHARAT_KEY,
       order_id: finalOrderId,
-      customer_name: customer_name,
+      customer_name: customer_name.substring(0, 30), // Limit length
       customer_mobile: customer_mobile,
-      amount: Math.floor(amount).toString(), // Ensure amount is an integer string as per example
+      amount: Math.floor(amount).toString(), // Must be string integer
     };
 
-    // Using the URL from the documentation's status table
+    console.log('Sending payload to Bharat4U:', { ...payload, bharat_key: '***' });
+
     const response = await fetch('https://api.bharat4upe.com/api/payin/v1/create-order', {
       method: 'POST',
       headers: {
@@ -36,15 +39,15 @@ export async function POST(request: Request) {
     if (data.status) {
       return NextResponse.json(data);
     } else {
-      // Log the actual error from Bharat4U to the server console for debugging
-      console.error('Bharat4U API Error Response:', data);
+      // Log the exact error from Bharat4U for debugging
+      console.error('Bharat4U API Error:', data);
       return NextResponse.json({ 
         error: data.msg || 'Payment initiation failed',
-        details: data
+        details: data 
       }, { status: 400 });
     }
   } catch (error: any) {
-    console.error('Bharat4U Server Error:', error);
+    console.error('Internal Server Error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
