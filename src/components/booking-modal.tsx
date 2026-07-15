@@ -62,7 +62,7 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
       const result = await response.json();
 
       if (response.ok && result.status) {
-        // V4 might return data.url or data.payment_url depending on the specific implementation
+        // Bharat4U typically returns the payment URL in data.url or data.payment_url
         const paymentUrl = result.data?.url || result.data?.payment_url;
         
         if (paymentUrl) {
@@ -76,7 +76,7 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
           console.error("Missing URL in response:", result);
         }
       } else {
-        const errorMsg = result.error || result.message || result.msg || "Payment initiation failed.";
+        const errorMsg = result.error || result.msg || result.message || "Payment initiation failed.";
         toast({
           title: "Booking Error",
           description: errorMsg,
