@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     // According to documentation: https://api.bharat4upe.com/api/payin/v4/create-order
     const API_URL = 'https://api.bharat4upe.com/api/payin/v4/create-order';
 
-    // Construct payload with strictly documented fields
+    // Construct payload with strictly documented fields for V4
     const payload = {
       bharat_mid: BHARAT_MID,
       bharat_key: BHARAT_KEY,
