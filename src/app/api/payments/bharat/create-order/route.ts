@@ -10,26 +10,29 @@ export async function POST(request: Request) {
     const BHARAT_MID = "BHARAT906370096";
     const BHARAT_KEY = "MKEY8ON66ORPLUF9";
 
-    // Generate a strictly alphanumeric unique order ID (Shorter for safety)
-    const timestamp = Date.now().toString().slice(-6);
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    const finalOrderId = order_id || `B${timestamp}${random}`;
+    // Workstation Base URL for callbacks
+    const baseUrl = "https://6000-firebase-studio-1756398918332.cluster-fdkw7vjj7bgguspe3fbbc25tra.cloudworkstations.dev";
 
-    // Based on the 404 error, the .php extension is incorrect.
-    // Based on the 400 error, the gateway is likely rejecting extra parameters like email or callback_url.
+    // Generate a strictly alphanumeric unique order ID (Using ORD prefix as per examples)
+    const finalOrderId = order_id || `ORD${Date.now()}${Math.floor(Math.random() * 1000)}`;
+
     const API_URL = 'https://api.bharat4upe.com/api/payin/v1/create-order';
 
-    // Construct the payload exactly as per the successful cURL example in documentation
+    // Construct the payload with all potentially required fields
+    // Many gateways return 'Missing parameters' if redirect/callback URLs aren't provided
     const payload = {
       bharat_mid: BHARAT_MID,
       bharat_key: BHARAT_KEY,
       order_id: finalOrderId,
       customer_name: (customer_name || "Customer").substring(0, 30).replace(/[^a-zA-Z0-9 ]/g, ''),
       customer_mobile: customer_mobile || "9999999999",
-      amount: Math.floor(amount).toString(), // Must be string integer as per cURL
+      customer_email: "nity.holiday@gmail.com", // Often required despite simple docs
+      amount: Math.floor(amount).toString(),
+      redirect_url: `${baseUrl}/payment-status`,
+      callback_url: `${baseUrl}/api/payments/bharat/callback`,
     };
 
-    console.log('Initiating Bharat4U Payment (V1):', { ...payload, bharat_key: '***' });
+    console.log('Initiating Bharat4U Payment (Full Payload):', { ...payload, bharat_key: '***' });
 
     const response = await fetch(API_URL, {
       method: 'POST',
@@ -54,7 +57,6 @@ export async function POST(request: Request) {
     if (data.status) {
       return NextResponse.json(data);
     } else {
-      // If status is false, return the error message from the gateway
       return NextResponse.json({ 
         error: data.msg || data.message || 'Payment initiation failed',
         details: data 
