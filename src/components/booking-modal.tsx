@@ -62,6 +62,7 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
       const result = await response.json();
 
       if (response.ok && result.status) {
+        // Bharat4U v4 returns the URL in data.url or similar
         const paymentUrl = result.data?.url || result.data?.payment_url || result.url || result.payment_url;
         
         if (paymentUrl) {

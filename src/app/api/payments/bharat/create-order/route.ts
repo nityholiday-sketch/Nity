@@ -18,8 +18,10 @@ export async function POST(request: Request) {
     const finalOrderId = order_id || `ORD${timestamp}${random}`;
 
     // Bharat4U V4 Create Order Endpoint
+    // According to documentation: https://api.bharat4upe.com/api/payin/v4/create-order
     const API_URL = 'https://api.bharat4upe.com/api/payin/v4/create-order';
 
+    // Construct payload with strictly documented fields
     const payload = {
       bharat_mid: BHARAT_MID,
       bharat_key: BHARAT_KEY,
@@ -49,6 +51,7 @@ export async function POST(request: Request) {
       }, { status: response.status });
     }
 
+    // Bharat4U typically returns { status: true, msg: "...", data: { url: "..." } }
     if (data.status) {
       return NextResponse.json(data);
     } else {
