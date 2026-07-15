@@ -20,12 +20,11 @@ export async function POST(request: Request) {
     const API_URL = 'https://api.bharat4upe.com/api/payin/v4/create-order';
 
     // Construct payload with exactly required fields for V4
-    // Note: V4 often requires redirect_url, callback_url, and remark
     const payload = {
       bharat_mid: BHARAT_MID,
       bharat_key: BHARAT_KEY,
       order_id: finalOrderId,
-      customer_name: (customer_name || "Customer").substring(0, 30).replace(/[^a-zA-Z0-9 ]/g, ''),
+      customer_name: (customer_name || "Customer").substring(0, 30).replace(/[^a-zA-Z0-9 ]/g, '').trim(),
       customer_mobile: (customer_mobile || "9999999999").replace(/[^0-9]/g, '').slice(-10),
       customer_email: customer_email || "customer@nityholiday.com",
       amount: Math.floor(amount).toString(),
@@ -54,9 +53,9 @@ export async function POST(request: Request) {
     if (data.status) {
       return NextResponse.json(data);
     } else {
-      // Common response for "Missing required parameters" usually contains a 'msg' key
+      // Return the exact message from Bharat4U for debugging
       return NextResponse.json({ 
-        error: data.msg || data.message || 'Payment initiation failed',
+        error: data.msg || data.message || 'Missing required parameters',
         details: data 
       }, { status: 400 });
     }
