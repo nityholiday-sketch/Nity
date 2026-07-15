@@ -15,23 +15,21 @@ export async function POST(request: Request) {
     const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
     const finalOrderId = order_id || `B${timestamp}${random}`;
 
-    // The documentation is contradictory about the .php extension. 
-    // Their cURL example uses it, so we will try it as a fix for the "Missing parameters" error.
-    const API_URL = 'https://api.bharat4upe.com/api/payin/v1/create-order.php';
+    // Based on the 404 error, the .php extension is incorrect.
+    // Based on the 400 error, the gateway is likely rejecting extra parameters like email or callback_url.
+    const API_URL = 'https://api.bharat4upe.com/api/payin/v1/create-order';
 
-    // Construct the full payload as per cURL example + common requirements
+    // Construct the payload exactly as per the successful cURL example in documentation
     const payload = {
       bharat_mid: BHARAT_MID,
       bharat_key: BHARAT_KEY,
       order_id: finalOrderId,
       customer_name: (customer_name || "Customer").substring(0, 30).replace(/[^a-zA-Z0-9 ]/g, ''),
       customer_mobile: customer_mobile || "9999999999",
-      customer_email: "customer@example.com", // Adding email as it's often a hidden requirement
-      amount: Math.floor(amount).toString(), // Must be string integer
-      callback_url: "https://nityholiday.com/api/payments/bharat/callback", // Including it in payload
+      amount: Math.floor(amount).toString(), // Must be string integer as per cURL
     };
 
-    console.log('Initiating Bharat4U Payment (V1 PHP):', { ...payload, bharat_key: '***' });
+    console.log('Initiating Bharat4U Payment (V1):', { ...payload, bharat_key: '***' });
 
     const response = await fetch(API_URL, {
       method: 'POST',
@@ -44,7 +42,10 @@ export async function POST(request: Request) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Bharat4U HTTP Error:', response.status, errorText);
-      return NextResponse.json({ error: `Gateway Error: ${response.status}`, details: errorText }, { status: response.status });
+      return NextResponse.json({ 
+        error: `Gateway Error: ${response.status}`, 
+        details: errorText 
+      }, { status: response.status });
     }
 
     const data = await response.json();
