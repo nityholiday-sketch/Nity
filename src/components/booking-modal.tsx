@@ -62,7 +62,6 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
       const result = await response.json();
 
       if (response.ok && result.status) {
-        // Bharat4U can return the URL in several different nested structures
         const paymentUrl = result.data?.url || result.data?.payment_url || result.url || result.payment_url;
         
         if (paymentUrl) {
@@ -73,7 +72,6 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
             description: "Transaction initiated but no payment URL was received.",
             variant: "destructive",
           });
-          console.error("Missing URL in successful response:", JSON.stringify(result, null, 2));
         }
       } else {
         const errorMsg = result.error || result.msg || result.message || "Missing required parameters";
@@ -85,7 +83,6 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
         console.error("Payment API Error Details:", JSON.stringify(result, null, 2));
       }
     } catch (error: any) {
-      console.error("Network or Connection Error:", error);
       toast({
         title: "Connection Error",
         description: error.message || "Failed to connect to the booking server.",
