@@ -20,6 +20,7 @@ export async function POST(request: Request) {
     const API_URL = 'https://api.bharat4upe.com/api/payin/v4/create-order';
 
     // Construct payload with exactly required fields for V4
+    // Note: V4 often requires redirect_url, callback_url, and remark
     const payload = {
       bharat_mid: BHARAT_MID,
       bharat_key: BHARAT_KEY,
@@ -53,6 +54,7 @@ export async function POST(request: Request) {
     if (data.status) {
       return NextResponse.json(data);
     } else {
+      // Common response for "Missing required parameters" usually contains a 'msg' key
       return NextResponse.json({ 
         error: data.msg || data.message || 'Payment initiation failed',
         details: data 
