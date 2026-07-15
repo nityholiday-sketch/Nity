@@ -61,16 +61,28 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
 
       const result = await response.json();
 
-      if (response.ok && result.status && result.data?.url) {
-        window.location.href = result.data.url;
+      if (response.ok && result.status) {
+        // V4 might return data.url or data.payment_url depending on the specific implementation
+        const paymentUrl = result.data?.url || result.data?.payment_url;
+        
+        if (paymentUrl) {
+          window.location.href = paymentUrl;
+        } else {
+          toast({
+            title: "Payment Error",
+            description: "Payment URL not found in gateway response.",
+            variant: "destructive",
+          });
+          console.error("Missing URL in response:", result);
+        }
       } else {
-        const errorMsg = result.error || result.msg || "Payment initiation failed.";
+        const errorMsg = result.error || result.message || result.msg || "Payment initiation failed.";
         toast({
           title: "Booking Error",
           description: errorMsg,
           variant: "destructive",
         });
-        console.error("Payment API Error:", JSON.stringify(result, null, 2));
+        console.error("Payment API Error Details:", JSON.stringify(result, null, 2));
       }
     } catch (error: any) {
       console.error("Connection Error:", error);
