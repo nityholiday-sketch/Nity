@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { amount, customer_name, customer_mobile, order_id } = body;
+    const { amount, customer_name, customer_mobile, customer_email, order_id } = body;
 
     // Bharat4U Credentials
     const BHARAT_MID = "BHARAT906370096";
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       order_id: finalOrderId,
       customer_name: (customer_name || "Customer").substring(0, 30).replace(/[^a-zA-Z0-9 ]/g, ''),
       customer_mobile: (customer_mobile || "9999999999").replace(/[^0-9]/g, '').slice(-10),
-      customer_email: "customer@nityholiday.com",
+      customer_email: customer_email || "customer@nityholiday.com",
       amount: Math.floor(amount).toString(),
       redirect_url: `${origin}/payment-status?order_id=${finalOrderId}`,
       callback_url: `${origin}/api/payments/bharat/callback`

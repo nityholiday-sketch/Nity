@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const BookingSchema = z.object({
   name: z.string().min(2, "Name is required"),
+  email: z.string().email("Please enter a valid email address"),
   mobile: z.string().regex(/^[6-9]\d{9}$/, "Please enter a valid 10-digit mobile number"),
 });
 
@@ -43,7 +44,7 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
 
   const form = useForm<z.infer<typeof BookingSchema>>({
     resolver: zodResolver(BookingSchema),
-    defaultValues: { name: "", mobile: "" },
+    defaultValues: { name: "", email: "", mobile: "" },
   });
 
   async function onSubmit(values: z.infer<typeof BookingSchema>) {
@@ -56,12 +57,14 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
           amount: amount,
           customer_name: values.name,
           customer_mobile: values.mobile,
+          customer_email: values.email,
         }),
       });
 
       const result = await response.json();
 
       if (response.ok && result.status) {
+        // Bharat4U returns the payment URL in result.data.url or result.url depending on version
         const paymentUrl = result.data?.url || result.data?.payment_url || result.url || result.payment_url;
         
         if (paymentUrl) {
@@ -74,7 +77,7 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
           });
         }
       } else {
-        const errorMsg = result.error || result.msg || result.message || "Missing required parameters";
+        const errorMsg = result.error || result.msg || result.message || "Payment initiation failed";
         toast({
           title: "Booking Error",
           description: errorMsg,
@@ -122,6 +125,19 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
             />
             <FormField
               control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email Address</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="your@email.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="mobile"
               render={({ field }) => (
                 <FormItem>
@@ -136,7 +152,7 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
             <div className="bg-secondary/50 p-4 rounded-lg flex items-start gap-3 mt-4">
               <ShieldCheck className="h-5 w-5 text-green-600 mt-1" />
               <p className="text-xs text-muted-foreground">
-                Your payment is processed securely via Bharat4U. Please ensure your mobile number is correct for confirmation.
+                Your payment is processed securely via Bharat4U. Ensure your details are correct for confirmation.
               </p>
             </div>
             <Button type="submit" className="w-full h-12 text-lg" disabled={loading}>
