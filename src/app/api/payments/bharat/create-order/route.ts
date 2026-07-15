@@ -12,16 +12,14 @@ export async function POST(request: Request) {
 
     const origin = request.headers.get('origin') || 'https://nityholiday.com';
 
-    // Generate a strictly alphanumeric unique order ID (15 chars max)
+    // Generate a strictly alphanumeric unique order ID (under 15 chars)
     const timestamp = Date.now().toString().slice(-8);
-    const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
-    const finalOrderId = order_id || `ORD${timestamp}${random}`;
+    const finalOrderId = order_id || `ORD${timestamp}`;
 
     // Bharat4U V4 Create Order Endpoint
-    // According to documentation: https://api.bharat4upe.com/api/payin/v4/create-order
     const API_URL = 'https://api.bharat4upe.com/api/payin/v4/create-order';
 
-    // Construct payload with strictly documented fields for V4
+    // Construct payload with exactly required fields for V4
     const payload = {
       bharat_mid: BHARAT_MID,
       bharat_key: BHARAT_KEY,
@@ -51,7 +49,6 @@ export async function POST(request: Request) {
       }, { status: response.status });
     }
 
-    // Bharat4U typically returns { status: true, msg: "...", data: { url: "..." } }
     if (data.status) {
       return NextResponse.json(data);
     } else {
