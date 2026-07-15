@@ -1,14 +1,15 @@
 
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, Plane, Train, Bus, AlertCircle, CheckCircle, XCircle, Send } from "lucide-react";
+import { Clock, Plane, Train, Bus, AlertCircle, CheckCircle, XCircle, CreditCard } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import type { Package } from "@/lib/data";
+import { BookingModal } from "@/components/booking-modal";
 
 const transportIcons: { [key: string]: React.ReactNode } = {
   Flight: <Plane className="h-5 w-5" />,
@@ -22,6 +23,8 @@ interface PackageDetailsClientProps {
 }
 
 export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+
   return (
     <div className="py-12">
       <div className="container mx-auto px-4 md:px-6">
@@ -120,23 +123,31 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
 
              <Card className="mt-8">
                 <CardHeader>
-                    <CardTitle className="font-headline">Interested in this Tour?</CardTitle>
+                    <CardTitle className="font-headline">Ready for Adventure?</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button asChild className="w-full h-12 text-lg">
-                    <Link href={`/contact?package=${encodeURIComponent(pkg.name)}`}>
-                      <Send className="mr-2 h-5 w-5" />
-                      Enquire Now
-                    </Link>
+                  <Button 
+                    className="w-full h-12 text-lg"
+                    onClick={() => setIsBookingModalOpen(true)}
+                  >
+                    <CreditCard className="mr-2 h-5 w-5" />
+                    Book Now
                   </Button>
                   <p className="text-xs text-center text-muted-foreground mt-4">
-                      Our travel experts will contact you with more information and booking details.
+                      Instant confirmation via Bharat4U secure payments.
                   </p>
                 </CardContent>
              </Card>
           </div>
         </div>
       </div>
+
+      <BookingModal 
+        isOpen={isBookingModalOpen} 
+        onClose={() => setIsBookingModalOpen(false)}
+        packageName={pkg.name}
+        amount={pkg.price}
+      />
     </div>
   );
 }
