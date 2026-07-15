@@ -10,24 +10,30 @@ export async function POST(request: Request) {
     const BHARAT_MID = "BHARAT906370096";
     const BHARAT_KEY = "MKEY8ON66ORPLUF9";
 
-    // Generate a strictly alphanumeric unique order ID (Max 20 chars for safety)
-    const timestamp = Date.now().toString().slice(-8);
-    const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
-    const finalOrderId = order_id || `ORD${timestamp}${random}`;
+    // Generate a strictly alphanumeric unique order ID (Shorter for safety)
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const finalOrderId = order_id || `B${timestamp}${random}`;
 
+    // The documentation is contradictory about the .php extension. 
+    // Their cURL example uses it, so we will try it as a fix for the "Missing parameters" error.
+    const API_URL = 'https://api.bharat4upe.com/api/payin/v1/create-order.php';
+
+    // Construct the full payload as per cURL example + common requirements
     const payload = {
       bharat_mid: BHARAT_MID,
       bharat_key: BHARAT_KEY,
       order_id: finalOrderId,
-      customer_name: customer_name.substring(0, 30).replace(/[^a-zA-Z0-9 ]/g, ''),
-      customer_mobile: customer_mobile,
+      customer_name: (customer_name || "Customer").substring(0, 30).replace(/[^a-zA-Z0-9 ]/g, ''),
+      customer_mobile: customer_mobile || "9999999999",
+      customer_email: "customer@example.com", // Adding email as it's often a hidden requirement
       amount: Math.floor(amount).toString(), // Must be string integer
+      callback_url: "https://nityholiday.com/api/payments/bharat/callback", // Including it in payload
     };
 
-    console.log('Initiating Bharat4U Payment:', { ...payload, bharat_key: '***' });
+    console.log('Initiating Bharat4U Payment (V1 PHP):', { ...payload, bharat_key: '***' });
 
-    // Using the V1 endpoint as per the primary documentation
-    const response = await fetch('https://api.bharat4upe.com/api/payin/v1/create-order', {
+    const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -47,8 +53,9 @@ export async function POST(request: Request) {
     if (data.status) {
       return NextResponse.json(data);
     } else {
+      // If status is false, return the error message from the gateway
       return NextResponse.json({ 
-        error: data.msg || 'Payment initiation failed',
+        error: data.msg || data.message || 'Payment initiation failed',
         details: data 
       }, { status: 400 });
     }
