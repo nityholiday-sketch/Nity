@@ -13,6 +13,7 @@ export async function POST(request: Request) {
     const origin = request.headers.get('origin') || 'https://nityholiday.com';
 
     // Generate a strictly alphanumeric unique order ID (under 15 chars)
+    // Some gateways are extremely strict about the length and characters of the order_id
     const timestamp = Date.now().toString().slice(-8);
     const finalOrderId = order_id || `ORD${timestamp}`;
 
@@ -20,6 +21,7 @@ export async function POST(request: Request) {
     const API_URL = 'https://api.bharat4upe.com/api/payin/v4/create-order';
 
     // Construct payload with exactly required fields for V4
+    // We add 'remark' as it is often a hidden requirement for V4
     const payload = {
       bharat_mid: BHARAT_MID,
       bharat_key: BHARAT_KEY,
@@ -28,8 +30,9 @@ export async function POST(request: Request) {
       customer_mobile: (customer_mobile || "9999999999").replace(/[^0-9]/g, '').slice(-10),
       customer_email: customer_email || "customer@nityholiday.com",
       amount: Math.floor(amount).toString(),
-      redirect_url: `${origin}/payment-status?order_id=${finalOrderId}`,
-      callback_url: `${origin}/api/payments/bharat/callback`
+      redirect_url: `${origin}/payment-status?order_id=${finalOrderId}&status=SUCCESS`,
+      callback_url: `${origin}/api/payments/bharat/callback`,
+      remark: "Tour Package Booking"
     };
 
     const response = await fetch(API_URL, {
