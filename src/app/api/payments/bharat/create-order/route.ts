@@ -12,20 +12,21 @@ export async function POST(request: Request) {
 
     // Generate a strictly alphanumeric unique order ID (Max 20 chars for safety)
     const timestamp = Date.now().toString().slice(-8);
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
     const finalOrderId = order_id || `ORD${timestamp}${random}`;
 
     const payload = {
       bharat_mid: BHARAT_MID,
       bharat_key: BHARAT_KEY,
       order_id: finalOrderId,
-      customer_name: customer_name.substring(0, 30), // Limit length
+      customer_name: customer_name.substring(0, 30).replace(/[^a-zA-Z0-9 ]/g, ''),
       customer_mobile: customer_mobile,
       amount: Math.floor(amount).toString(), // Must be string integer
     };
 
-    console.log('Initiating Bharat4U Payment with payload:', { ...payload, bharat_key: '***' });
+    console.log('Initiating Bharat4U Payment:', { ...payload, bharat_key: '***' });
 
+    // Using the V1 endpoint as per the primary documentation
     const response = await fetch('https://api.bharat4upe.com/api/payin/v1/create-order', {
       method: 'POST',
       headers: {
@@ -34,14 +35,18 @@ export async function POST(request: Request) {
       body: JSON.stringify(payload),
     });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Bharat4U HTTP Error:', response.status, errorText);
+      return NextResponse.json({ error: `Gateway Error: ${response.status}`, details: errorText }, { status: response.status });
+    }
+
     const data = await response.json();
+    console.log('Bharat4U API Response:', data);
 
     if (data.status) {
-      console.log('Bharat4U Success Response:', data);
       return NextResponse.json(data);
     } else {
-      // Log the exact error from Bharat4U for debugging
-      console.error('Bharat4U API Error Response:', data);
       return NextResponse.json({ 
         error: data.msg || 'Payment initiation failed',
         details: data 
@@ -49,6 +54,6 @@ export async function POST(request: Request) {
     }
   } catch (error: any) {
     console.error('Internal Server Error in Bharat Payment Route:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }

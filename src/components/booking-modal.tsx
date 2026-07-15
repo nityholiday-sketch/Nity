@@ -64,17 +64,19 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
       if (response.ok && result.status && result.data?.url) {
         window.location.href = result.data.url;
       } else {
+        const errorMsg = result.error || result.msg || "Payment initiation failed.";
         toast({
           title: "Booking Error",
-          description: result.error || "Payment initiation failed. Please try again.",
+          description: errorMsg,
           variant: "destructive",
         });
-        console.error("Payment API Error:", result);
+        console.error("Payment API Error:", JSON.stringify(result, null, 2));
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Connection Error:", error);
       toast({
         title: "Connection Error",
-        description: "Failed to connect to the booking server.",
+        description: error.message || "Failed to connect to the booking server.",
         variant: "destructive",
       });
     } finally {
