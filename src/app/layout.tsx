@@ -1,3 +1,4 @@
+
 import type { Metadata, Viewport } from 'next';
 import { Toaster } from "@/components/ui/toaster"
 import { Header } from '@/components/header';
@@ -5,7 +6,6 @@ import { Footer } from '@/components/footer';
 import FloatingWhatsapp from '@/components/floating-whatsapp';
 import './globals.css';
 import { Inter } from 'next/font/google';
-import { PaymentSecurityNotice } from '@/components/payment-security-notice';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -15,7 +15,7 @@ const inter = Inter({
 
 const APP_NAME = "Nityholiday";
 const APP_DESCRIPTION = "Explore the world with Nityholiday. We offer personalized tour packages, verified services, and competitive pricing for an unforgettable travel experience.";
-const APP_URL = "https://nityholiday.com"; // Replace with your actual domain
+const APP_URL = "https://nityholiday.com";
 
 export const metadata: Metadata = {
   title: {
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     description: APP_DESCRIPTION,
     siteName: APP_NAME,
     images: [{
-      url: `${APP_URL}/og-image.jpg`, // Replace with your actual OG image URL
+      url: `${APP_URL}/og-image.jpg`,
       width: 1200,
       height: 630,
       alt: "Nityholiday - Your Gateway to Unforgettable Journeys",
@@ -46,14 +46,13 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: APP_NAME,
     description: APP_DESCRIPTION,
-    images: [`${APP_URL}/og-image.jpg`], // Replace with your actual OG image URL
+    images: [`${APP_URL}/og-image.jpg`],
   },
 };
 
 export const viewport: Viewport = {
   themeColor: '#013220',
 };
-
 
 export default function RootLayout({
   children,
@@ -72,7 +71,6 @@ export default function RootLayout({
         </div>
         <FloatingWhatsapp />
         <Toaster />
-        <PaymentSecurityNotice />
       </body>
     </html>
   );
