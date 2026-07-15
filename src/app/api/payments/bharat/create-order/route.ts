@@ -13,7 +13,6 @@ export async function POST(request: Request) {
     const origin = request.headers.get('origin') || 'https://nityholiday.com';
 
     // Generate a strictly alphanumeric unique order ID (under 15 chars)
-    // Some gateways are extremely strict about the length and characters of the order_id
     const timestamp = Date.now().toString().slice(-8);
     const finalOrderId = order_id || `ORD${timestamp}`;
 
@@ -21,7 +20,6 @@ export async function POST(request: Request) {
     const API_URL = 'https://api.bharat4upe.com/api/payin/v4/create-order';
 
     // Construct payload with exactly required fields for V4
-    // We add 'remark' as it is often a hidden requirement for V4
     const payload = {
       bharat_mid: BHARAT_MID,
       bharat_key: BHARAT_KEY,
