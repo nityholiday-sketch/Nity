@@ -48,14 +48,16 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
   async function onSubmit(values: z.infer<typeof BookingSchema>) {
     setLoading(true);
     try {
-      const response = await fetch("/api/payments/bharat/create-order/", {
+      const orderId = `NH${Math.floor(Date.now() / 1000)}${Math.floor(Math.random() * 100)}`;
+      
+      const response = await fetch("/api/payments/bharat/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount: amount,
           customer_name: values.name,
           customer_mobile: values.mobile,
-          order_id: `NH${Date.now()}`,
+          order_id: orderId,
         }),
       });
 
