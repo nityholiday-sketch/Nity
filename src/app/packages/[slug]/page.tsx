@@ -5,7 +5,7 @@ import { PackageDetailsClient } from "@/components/package-details";
 import type { Metadata } from "next";
 
 type Props = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 export async function generateStaticParams() {

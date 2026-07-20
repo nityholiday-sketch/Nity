@@ -15,6 +15,29 @@ export type Package = {
 };
 
 export const packages: Package[] = [
+  // ─── 🧪 TEST PACKAGE — REMOVE BEFORE GOING LIVE ──────────────────────────
+  {
+    id: 'payment-test-100',
+    slug: 'payment-test-100',
+    name: '🧪 Payment Test Package (₹100)',
+    image: 'https://firebasestorage.googleapis.com/v0/b/nityholiday-adventures.firebasestorage.app/o/Char%20Dham%20Yatra%20by%20Bus.png?alt=media&token=0d1ba896-d8bf-4d89-9ae2-602e767ad757',
+    description: 'This is a test package for verifying the payment gateway integration. Price is ₹100. Do not book this package — for internal testing only.',
+    price: 100,
+    duration: '1 Day / Test Only',
+    transport: ['Bus'],
+    featured: true,
+    itinerary: [
+      {
+        day: 1,
+        title: 'Test Day',
+        description: 'This is a test itinerary entry for payment gateway verification purposes.',
+      },
+    ],
+    inclusions: ['Payment gateway test', 'Refund on successful verification'],
+    exclusions: ['Everything else — this is a test package only'],
+  },
+  // ─────────────────────────────────────────────────────────────────────────
+
   {
     id: 'char-dham-yatra-by-bus',
     slug: 'char-dham-yatra-by-bus',

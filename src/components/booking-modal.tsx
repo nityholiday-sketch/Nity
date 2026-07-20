@@ -50,7 +50,7 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
   async function onSubmit(values: z.infer<typeof BookingSchema>) {
     setLoading(true);
     try {
-      const response = await fetch("/api/payments/bharat/create-order", {
+      const response = await fetch("/api/payments/shaymavenue/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -77,7 +77,14 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
           });
         }
       } else {
-        const errorMsg = result.error || result.msg || result.message || "Payment initiation failed";
+        // Prefer the most specific message from the gateway (e.g. from details.msg)
+        const errorMsg =
+          result.details?.msg ||
+          result.details?.message ||
+          result.error ||
+          result.msg ||
+          result.message ||
+          "Payment initiation failed. Please try again.";
         toast({
           title: "Booking Error",
           description: errorMsg,
@@ -152,7 +159,7 @@ export function BookingModal({ isOpen, onClose, packageName, amount }: BookingMo
             <div className="bg-secondary/50 p-4 rounded-lg flex items-start gap-3 mt-4">
               <ShieldCheck className="h-5 w-5 text-green-600 mt-1" />
               <p className="text-xs text-muted-foreground">
-                Your payment is processed securely via Bharat4U. Ensure your details are correct for confirmation.
+                Your payment is processed securely via Shaymavenue. Ensure your details are correct for confirmation.
               </p>
             </div>
             <Button type="submit" className="w-full h-12 text-lg" disabled={loading}>
