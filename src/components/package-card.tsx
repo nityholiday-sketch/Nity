@@ -36,7 +36,7 @@ export function PackageCard({ pkg }: PackageCardProps) {
       <CardContent className="flex flex-1 flex-col p-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <MapPin className="h-4 w-4 text-primary" />
-            <span>Uttarakhand</span>
+            <span>{pkg.location}</span>
         </div>
         <CardTitle className="font-headline text-xl mb-2">{pkg.name}</CardTitle>
         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">

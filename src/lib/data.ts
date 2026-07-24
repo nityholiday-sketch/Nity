@@ -7,6 +7,7 @@ export type Package = {
   description: string;
   price: number;
   duration: string;
+  location: string;
   transport: ('Train' | 'Flight' | 'Heli' | 'Bus')[];
   featured: boolean;
   itinerary: { day: number | string; title: string; description: string }[];
@@ -23,6 +24,7 @@ export const packages: Package[] = [
     description: 'Experience the divine Char Dham pilgrimage in comfort on an air-conditioned bus.',
     price: 42000,
     duration: '10 Days/9 Nights',
+    location: 'Uttarakhand',
     transport: ['Bus'],
     featured: true,
     itinerary: [
@@ -100,6 +102,7 @@ export const packages: Package[] = [
     description: 'Experience the sacred Char Dham in ultimate comfort and time-efficiency aboard our VIP helicopter service.',
     price: 276000,
     duration: '6 Days/5 Nights',
+    location: 'Uttarakhand',
     transport: ['Heli', 'Bus'],
     featured: true,
     itinerary: [
@@ -154,6 +157,7 @@ export const packages: Package[] = [
     description: 'Discover the charm of Rajasthan with our exclusive 2 Days / 2 Nights Living Desert Camp package. Enjoy a royal stay in luxury Swiss tents, mesmerizing camel and jeep safaris, Rajasthani folk music, traditional cuisine, and unforgettable sunsets amidst the golden dunes. Perfect for travelers who want to feel the true desert spirit with comfort and culture.',
     price: 5500,
     duration: '2 Days / 2 Nights',
+    location: 'Rajasthan',
     transport: ['Bus'],
     featured: true,
     itinerary: [
@@ -196,6 +200,7 @@ export const packages: Package[] = [
     description: 'Discover the scenic beauty of Uttarakhand on this action-packed 5 Days/4 Nights adventure trip.',
     price: 45000,
     duration: '5 Days/4 Nights',
+    location: 'Uttarakhand',
     transport: ['Bus'],
     featured: true,
     itinerary: [
@@ -223,6 +228,7 @@ export const packages: Package[] = [
     description: 'Embark on a soul-nourishing journey through Uttarakhand’s most sacred spots.',
     price: 35000,
     duration: '4 Days/3 Nights',
+    location: 'Uttarakhand',
     transport: ['Bus'],
     featured: true,
     itinerary: [
@@ -250,6 +256,7 @@ export const packages: Package[] = [
     description: 'Embark on an unforgettable journey to the Andaman Islands. This package covers Port Blair, Havelock, and Neil Island, offering a perfect blend of adventure and relaxation.',
     price: 81500,
     duration: '6 Days/5 Nights',
+    location: 'Andaman & Nicobar',
     transport: ['Flight'],
     featured: false,
     itinerary: [
@@ -286,6 +293,7 @@ export const packages: Package[] = [
     description: 'Discover Gujarat’s vibrant heritage and untamed wildlife on this immersive 7-day journey.',
     price: 25000,
     duration: '7 Days/6 Nights',
+    location: 'Gujarat',
     transport: ['Bus'],
     featured: false,
     itinerary: [
@@ -316,6 +324,7 @@ export const packages: Package[] = [
     description: 'Embark on a regal journey through the “Land of Kings.” This 8-day adventure immerses you in Rajasthan’s royal heritage.',
     price: 55000,
     duration: '8 Days / 7 Nights',
+    location: 'Rajasthan',
     transport: ['Bus', 'Flight'],
     featured: false,
     itinerary: [
