@@ -4,7 +4,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, Plane, Train, Bus, AlertCircle, CheckCircle, XCircle, CreditCard } from "lucide-react";
+import { Clock, Plane, Train, Bus, AlertCircle, CheckCircle, XCircle, CalendarCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -130,11 +130,11 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                     className="w-full h-12 text-lg"
                     onClick={() => setIsBookingModalOpen(true)}
                   >
-                    <CreditCard className="mr-2 h-5 w-5" />
-                    Book Now
+                    <CalendarCheck className="mr-2 h-5 w-5" />
+                    Book Tour Now
                   </Button>
                   <p className="text-xs text-center text-muted-foreground mt-4">
-                      Instant confirmation via Bharat4U secure payments.
+                      Instant confirmation &amp; 100% secure payment via CCAvenue.
                   </p>
                 </CardContent>
              </Card>

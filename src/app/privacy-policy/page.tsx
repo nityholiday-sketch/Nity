@@ -14,7 +14,7 @@ export default function PrivacyPolicyPage() {
           <p><em>Effective Date: August 27, 2025</em></p>
 
           <p>
-            This Privacy Policy outlines how NITYTRAVELTODREAM LLP and its affiliates ("we", "us", "our") collect, use, disclose, and protect your personal information through our website: https://nityholiday.com/ (hereinafter referred to as the "Platform").
+            This Privacy Policy outlines how NITYTRAVELTODREAM LLP and its affiliates (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) collect, use, disclose, and protect your personal information through our website: https://nityholiday.com/ (hereinafter referred to as the &quot;Platform&quot;).
           </p>
           <p>
             By accessing or using the Platform, you agree to be bound by this Privacy Policy, our Terms of Use, and all applicable laws governing privacy and data protection in India. If you do not agree, please do not use or access the Platform.
@@ -22,121 +22,64 @@ export default function PrivacyPolicyPage() {
 
           <h2 className="font-headline">1. Introduction</h2>
           <p>
-            This Privacy Policy applies to all users of the Platform in India. We do not offer services outside India. You may browse some sections of the Platform without registering. Your personal data will be stored and processed in India. By using the Platform, you consent to data processing as per this policy.
+            This Privacy Policy applies to all users of the Platform in India. We do not offer services outside India. You may browse sections of the Platform without submitting personal details. Your contact data will be stored and processed in India. By using the Platform, you consent to data processing as per this policy.
           </p>
 
           <h2 className="font-headline">2. Data Collection</h2>
           <p>
-            We collect your personal and sensitive data when you interact with our Platform, services, or third-party partners. This includes:
+            We collect personal information when you interact with our Platform, submit booking inquiries, or contact us. This includes:
           </p>
           <h3>Personal Information:</h3>
           <ul>
             <li>Full Name</li>
-            <li>Date of Birth</li>
-            <li>Address</li>
-            <li>Contact Numbers</li>
-            <li>Email ID</li>
-            <li>Identity/Address Proof (when required)</li>
-          </ul>
-          <h3>Sensitive Personal Information (with consent):</h3>
-          <ul>
-            <li>Bank account details, credit/debit card information</li>
-            <li>Biometric data (e.g., facial features, physiological traits)</li>
-            <li>Payment information</li>
+            <li>Contact Mobile Numbers</li>
+            <li>Email Address</li>
+            <li>Preferred Travel Dates and Destinations</li>
+            <li>Special requests or travel preferences</li>
+            <li>Identity/Address Proof (when required for hotel/permit reservations)</li>
           </ul>
           <h3>Other Information:</h3>
           <ul>
-            <li>Transaction data</li>
-            <li>Behavioral data (clicks, preferences, usage patterns)</li>
+            <li>Communication history (inquiries, support messages)</li>
+            <li>Behavioral data (pages viewed, package preferences)</li>
             <li>Data shared during customer support interactions</li>
-            <li>Data collected through third-party platforms</li>
           </ul>
           <p>
-            <strong>⚠️ If you receive fraudulent communication asking for sensitive data (PIN, passwords), do not respond. Report to relevant law enforcement immediately.</strong>
+            <strong>⚠️ Note: NityHoliday does not request or store sensitive banking PINs or card passwords online. If you receive suspicious communications claiming to be us, do not respond and report it immediately.</strong>
           </p>
 
           <h2 className="font-headline">3. Usage of Collected Information</h2>
           <p>We use your data to:</p>
           <ul>
-            <li>Deliver requested services and process transactions</li>
-            <li>Improve customer experience and personalize services</li>
-            <li>Resolve disputes, troubleshoot, and enforce policies</li>
-            <li>Inform you of offers, updates, or service changes</li>
-            <li>Conduct research and internal analysis</li>
-            <li>Prevent fraud and monitor compliance</li>
+            <li>Respond to tour inquiries and organize custom travel itineraries</li>
+            <li>Coordinate reservations with trusted hotel and transport partners</li>
+            <li>Improve customer experience and personalize travel recommendations</li>
+            <li>Resolve disputes and enforce travel policies</li>
+            <li>Provide timely trip updates and support</li>
           </ul>
-          <p>You may choose to opt-out of promotional communications.</p>
+          <p>You may choose to opt-out of promotional communications at any time.</p>
 
-          <h2 className="font-headline">4. Booking, Payment, and Cancellation Policy</h2>
+          <h2 className="font-headline">4. Tour Inquiries &amp; Booking Terms</h2>
           <p>
-            All bookings made through the Platform are final. By completing a transaction, you agree to the following terms:
+            Tour inquiries submitted on the Platform are processed directly by our travel planning team. Detailed confirmation and itinerary documentation will be shared prior to travel commencement.
           </p>
-          <ul>
-            <li><strong>No Cancellation:</strong> Once a booking is confirmed, it cannot be cancelled.</li>
-            <li><strong>No Refund:</strong> We do not provide refunds for any bookings under any circumstances.</li>
-            <li><strong>Final Payments:</strong> All payments made are non-refundable and non-transferable.</li>
-          </ul>
 
-          <h2 className="font-headline">5. Data Sharing & Disclosure</h2>
+          <h2 className="font-headline">5. Data Sharing &amp; Disclosure</h2>
           <p>
-            We may share your data with our affiliates, business partners, or legal authorities for the following purposes:
+            We may share necessary traveler details (such as names and identity documents) with authorized travel partners (hotels, transport operators, government permit authorities) strictly for executing your booked itinerary. We do not sell your personal information to third parties.
           </p>
-          <ul>
-            <li>To provide and improve our services</li>
-            <li>To comply with our legal obligations</li>
-            <li>To investigate and prevent fraudulent or illegal activities</li>
-            <li>For marketing and promotional purposes, from which you can opt-out</li>
-          </ul>
 
           <h2 className="font-headline">6. Security Measures</h2>
           <p>
-            We adopt reasonable security practices to protect your data from unauthorized access, loss, misuse, or alteration. Data is transmitted via secure servers. However, transmission over the internet can never be completely secure. Users are advised to:
-          </p>
-          <ul>
-            <li>Maintain confidentiality of login credentials</li>
-            <li>Regularly update passwords</li>
-          </ul>
-
-          <h2 className="font-headline">7. Data Retention & Deletion</h2>
-          <p>
-            You may delete your account from your profile settings or by contacting us. We may retain data if:
-          </p>
-          <ul>
-            <li>There are pending services or disputes</li>
-            <li>Required for legal, fraud prevention, or legitimate purposes</li>
-            <li>Deleted accounts result in loss of all user data</li>
-          </ul>
-          <p>Anonymized data may be retained for analysis and research</p>
-
-          <h2 className="font-headline">8. User Rights</h2>
-          <p>You have the right to:</p>
-          <ul>
-            <li>Access and update your personal information</li>
-            <li>Rectify any inaccuracies</li>
-            <li>Request deletion of your account and data</li>
-          </ul>
-
-          <h2 className="font-headline">9. Consent</h2>
-          <p>
-            By using our Platform or providing your data:
-          </p>
-          <ul>
-            <li>You consent to data processing as described in this policy</li>
-            <li>You confirm you have the authority to provide data for others (if applicable)</li>
-            <li>You consent to being contacted via SMS, email, or call for service-related communication</li>
-          </ul>
-          <h3>Withdrawal of Consent:</h3>
-          <p>To withdraw consent, contact our Grievance Officer (details below) with the subject: “Withdrawal of consent for processing personal data”</p>
-          <p>
-            <strong>⚠️ Withdrawal of consent may result in limited or no access to some services.</strong>
-          </p>
-          
-          <h2 className="font-headline">10. Changes to the Privacy Policy</h2>
-          <p>
-            We may periodically update this Privacy Policy to reflect changes in practices, laws, or services. Please check this page regularly for updates. If required by law, we will notify you of significant changes.
+            We adopt reasonable security practices to protect your data from unauthorized access, loss, or misuse. Data is stored on secure cloud servers.
           </p>
 
-          <h2 className="font-headline">11. Grievance Redressal</h2>
+          <h2 className="font-headline">7. Data Retention &amp; User Rights</h2>
+          <p>
+            You have the right to request access, updates, or deletion of your contact data by reaching out to our team at any time.
+          </p>
+
+          <h2 className="font-headline">8. Grievance Redressal</h2>
           <p>
             If you have any questions, complaints, or requests related to your personal data or this Privacy Policy, please contact:
           </p>

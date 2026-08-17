@@ -14,14 +14,19 @@ env:
       - BUILD
       - RUNTIME
 
-  # --- BHARAT4U PAYMENT GATEWAY ---
-  - variable: BHARAT_MID
-    value: BHARAT906370096
+  # --- CCAVENUE PAYMENT GATEWAY ---
+  - variable: CCAVENUE_MERCHANT_ID
+    value: "4394334"
     availability:
       - RUNTIME
 
-  - variable: BHARAT_KEY
-    value: MKEY8ON66ORPLUF9
+  - variable: CCAVENUE_ACCESS_CODE
+    value: "AVCU82MG22BA07UCAB"
+    availability:
+      - RUNTIME
+
+  - variable: CCAVENUE_WORKING_KEY
+    value: "838ACE370BB450A254AE3FF02355588F"
     availability:
       - RUNTIME
 
