@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Logo } from "@/components/logo";
+import { CurrencySwitcher } from "@/components/currency-switcher";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -51,10 +52,13 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        <div className="ml-auto flex items-center gap-4">
-           <Button asChild size="sm" className="hidden md:flex">
-              <Link href="/contact">Book Now</Link>
-            </Button>
+        <div className="ml-auto flex items-center gap-3 sm:gap-4">
+          <CurrencySwitcher />
+
+          <Button asChild size="sm" className="hidden md:flex">
+            <Link href="/contact">Book Now</Link>
+          </Button>
+
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="md:hidden">
@@ -81,6 +85,13 @@ export function Header() {
                       </Link>
                     ))}
                   </nav>
+
+                  <div className="pt-8 mt-8 border-t space-y-4">
+                    <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">
+                      Currency Preference
+                    </p>
+                    <CurrencySwitcher className="w-full justify-between" />
+                  </div>
                </div>
             </SheetContent>
           </Sheet>

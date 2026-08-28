@@ -27,12 +27,15 @@ function PaymentStatusContent() {
   const [packageName, setPackageName] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const [currency, setCurrency] = useState<string>("INR");
+
   useEffect(() => {
     const s = searchParams.get("status");
     const oid = searchParams.get("order_id");
     const payglocalGid = searchParams.get("gid");
     const tid = searchParams.get("tracking_id");
     const amt = searchParams.get("amount");
+    const curr = searchParams.get("currency") || (searchParams.get("txnCurrency") || "INR");
     const pkg = searchParams.get("package");
     const msg = searchParams.get("msg");
 
@@ -40,6 +43,7 @@ function PaymentStatusContent() {
     setGid(payglocalGid);
     setTrackingId(tid || payglocalGid);
     setAmount(amt);
+    setCurrency(curr.toUpperCase());
     setPackageName(pkg);
     setErrorMessage(msg);
 
@@ -52,8 +56,10 @@ function PaymentStatusContent() {
     }
   }, [searchParams]);
 
+  const currencySymbol = currency === "USD" ? "$" : "₹";
+
   const whatsappMessage = encodeURIComponent(
-    `Hello Nityholiday! My PayGlocal payment of ₹${amount || ""} for ${
+    `Hello Nityholiday! My PayGlocal payment of ${currencySymbol}${amount || ""} for ${
       packageName || "Holiday Package"
     } was successful. (PayGlocal ID: ${gid || trackingId || ""}, Order ID: ${orderId || ""}). Please share the confirmation voucher.`
   );
@@ -124,7 +130,7 @@ function PaymentStatusContent() {
             {amount && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Amount Paid:</span>
-                <span className="font-bold text-primary text-base">₹{parseFloat(amount).toLocaleString()}</span>
+                <span className="font-bold text-primary text-base">{currencySymbol}{parseFloat(amount).toLocaleString()} ({currency})</span>
               </div>
             )}
 

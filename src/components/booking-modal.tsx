@@ -8,7 +8,6 @@ import {
   Loader2,
   CreditCard,
   ShieldCheck,
-  IndianRupee,
   Wallet,
   ArrowLeft,
   CheckCircle2,
@@ -18,7 +17,6 @@ import {
   User,
   Calendar as CalendarIcon,
   Users,
-  MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,13 +36,15 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/context/currency-context";
+import { CurrencySegmentedToggle } from "@/components/currency-switcher";
 
 const BookingDetailsSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
   mobile: z
     .string()
-    .regex(/^[6-9]\d{9}$/, "Please enter a valid 10-digit mobile number"),
+    .min(7, "Please enter a valid mobile number"),
   travelDate: z.string().optional(),
   guests: z.coerce.number().min(1, "Minimum 1 guest").max(50).default(1),
 });
@@ -56,7 +56,7 @@ interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   packageName: string;
-  amount: number;
+  amount: number; // Base amount in INR
 }
 
 export function BookingModal({
@@ -71,6 +71,7 @@ export function BookingModal({
   const [advanceError, setAdvanceError] = useState<string>("");
   const [formValues, setFormValues] = useState<BookingDetails | null>(null);
   const { toast } = useToast();
+  const { currency, currencyConfig, convertPrice, formatAmount } = useCurrency();
 
   const form = useForm<BookingDetails>({
     resolver: zodResolver(BookingDetailsSchema),
@@ -83,7 +84,15 @@ export function BookingModal({
     },
   });
 
-  const totalPackagePrice = (formValues?.guests || 1) * amount;
+  // Calculate prices converted to current selected currency
+  const perPersonPriceInCurrency = convertPrice(amount);
+  const totalPackagePriceInCurrency = (formValues?.guests || 1) * perPersonPriceInCurrency;
+
+  const minAdvanceAmount = currency === "USD" ? 10 : 500;
+  const quickSelectValues =
+    currency === "USD"
+      ? [20, 50, 100, 250]
+      : [1000, 2000, 5000, 10000];
 
   const handleClose = () => {
     setStep("details");
@@ -110,6 +119,7 @@ export function BookingModal({
         body: JSON.stringify({
           packageName,
           amount: payAmount,
+          currency,
           customer_name: formValues.name,
           customer_email: formValues.email,
           customer_mobile: formValues.mobile,
@@ -127,7 +137,7 @@ export function BookingModal({
         const errorMsg =
           result.error ||
           result.message ||
-          "Payment initiation failed. Please try again.";
+          "Payment initiation failed. Please verify your PayGlocal credentials or try again.";
         toast({
           title: "Payment Error",
           description: errorMsg,
@@ -148,12 +158,12 @@ export function BookingModal({
 
   function handleAdvancePay() {
     const val = parseFloat(advanceAmount);
-    if (!advanceAmount || isNaN(val) || val < 500) {
-      setAdvanceError("Please enter a valid amount (minimum ₹500).");
+    if (!advanceAmount || isNaN(val) || val < minAdvanceAmount) {
+      setAdvanceError(`Please enter a valid amount (minimum ${currencyConfig.symbol}${minAdvanceAmount}).`);
       return;
     }
-    if (val > totalPackagePrice) {
-      setAdvanceError(`Amount cannot exceed the total amount of ₹${totalPackagePrice.toLocaleString()}.`);
+    if (val > totalPackagePriceInCurrency) {
+      setAdvanceError(`Amount cannot exceed the total amount of ${currencyConfig.symbol}${totalPackagePriceInCurrency.toLocaleString()}.`);
       return;
     }
     setAdvanceError("");
@@ -162,16 +172,19 @@ export function BookingModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[480px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[490px] max-h-[90vh] overflow-y-auto">
         {/* ── STEP 1: Traveler Details ── */}
         {step === "details" && (
           <>
             <DialogHeader>
-              <DialogTitle className="font-headline text-2xl flex items-center gap-2 text-primary">
-                <CalendarCheck className="h-6 w-6" /> Book Your Journey
-              </DialogTitle>
+              <div className="flex items-center justify-between gap-2">
+                <DialogTitle className="font-headline text-2xl flex items-center gap-2 text-primary">
+                  <CalendarCheck className="h-6 w-6" /> Book Your Journey
+                </DialogTitle>
+                <CurrencySegmentedToggle />
+              </div>
               <DialogDescription>
-                You are booking: <strong>{packageName}</strong> at ₹{amount.toLocaleString()} / person
+                You are booking: <strong>{packageName}</strong> at {formatAmount(perPersonPriceInCurrency)} / person
               </DialogDescription>
             </DialogHeader>
 
@@ -200,10 +213,10 @@ export function BookingModal({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center gap-1.5">
-                          <Phone className="h-4 w-4 text-muted-foreground" /> Mobile Number
+                          <Phone className="h-4 w-4 text-muted-foreground" /> Mobile / WhatsApp
                         </FormLabel>
                         <FormControl>
-                          <Input placeholder="10-digit mobile number" {...field} />
+                          <Input placeholder="Mobile with country code" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -264,7 +277,7 @@ export function BookingModal({
                 <div className="bg-secondary/60 p-3.5 rounded-lg flex items-start gap-2.5 mt-2">
                   <ShieldCheck className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Payments are encrypted &amp; processed securely via <strong>PayGlocal</strong> (Credit/Debit Card, NetBanking, UPI, International Cards, Wallets).
+                    Payments are encrypted &amp; processed securely via <strong>PayGlocal</strong> (Global &amp; Domestic Cards, UPI, NetBanking).
                   </p>
                 </div>
 
@@ -280,9 +293,12 @@ export function BookingModal({
         {step === "payment-type" && (
           <>
             <DialogHeader>
-              <DialogTitle className="font-headline text-2xl flex items-center gap-2">
-                <CreditCard className="text-primary" /> Select Payment Mode
-              </DialogTitle>
+              <div className="flex items-center justify-between gap-2">
+                <DialogTitle className="font-headline text-2xl flex items-center gap-2">
+                  <CreditCard className="text-primary" /> Select Payment Mode
+                </DialogTitle>
+                <CurrencySegmentedToggle />
+              </div>
               <DialogDescription>
                 Booking for <strong>{packageName}</strong> ({formValues?.guests} traveler{formValues?.guests && formValues.guests > 1 ? "s" : ""})
               </DialogDescription>
@@ -291,23 +307,23 @@ export function BookingModal({
             <div className="pt-4 space-y-4">
               {/* Full Payment */}
               <button
-                onClick={() => initiatePayGlocalPayment(totalPackagePrice)}
+                onClick={() => initiatePayGlocalPayment(totalPackagePriceInCurrency)}
                 disabled={loading}
                 className="w-full text-left rounded-xl border-2 border-primary/30 hover:border-primary bg-primary/5 hover:bg-primary/10 p-4 sm:p-5 transition-all duration-200 group disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <div className="flex items-center gap-3">
-                  <div className="rounded-full bg-primary/10 group-hover:bg-primary/20 p-2.5 transition-colors">
-                    <IndianRupee className="h-6 w-6 text-primary" />
+                  <div className="rounded-full bg-primary/10 group-hover:bg-primary/20 p-2.5 transition-colors font-bold text-lg text-primary min-w-[40px] text-center">
+                    {currencyConfig.symbol}
                   </div>
                   <div>
                     <p className="font-semibold text-base">Full Payment</p>
                     <p className="text-xs sm:text-sm text-muted-foreground">
-                      Pay complete tour package amount
+                      Pay complete tour package amount in {currency}
                     </p>
                   </div>
                   <div className="ml-auto text-right">
                     <p className="font-bold text-lg text-primary">
-                      ₹{totalPackagePrice.toLocaleString()}
+                      {formatAmount(totalPackagePriceInCurrency)}
                     </p>
                   </div>
                 </div>
@@ -335,7 +351,7 @@ export function BookingModal({
                   </div>
                   <div className="ml-auto text-right">
                     <p className="text-sm font-semibold text-orange-500">Custom</p>
-                    <p className="text-xs text-muted-foreground">Min ₹500</p>
+                    <p className="text-xs text-muted-foreground">Min {currencyConfig.symbol}{minAdvanceAmount}</p>
                   </div>
                 </div>
                 <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
@@ -367,9 +383,12 @@ export function BookingModal({
         {step === "advance-amount" && (
           <>
             <DialogHeader>
-              <DialogTitle className="font-headline text-2xl flex items-center gap-2">
-                <Wallet className="text-orange-500" /> Advance Booking Amount
-              </DialogTitle>
+              <div className="flex items-center justify-between gap-2">
+                <DialogTitle className="font-headline text-2xl flex items-center gap-2">
+                  <Wallet className="text-orange-500" /> Advance Booking Amount
+                </DialogTitle>
+                <CurrencySegmentedToggle />
+              </div>
               <DialogDescription>
                 Enter the amount you wish to pay now for <strong>{packageName}</strong>.
               </DialogDescription>
@@ -378,22 +397,22 @@ export function BookingModal({
             <div className="pt-3 space-y-4">
               <div className="flex items-center justify-between rounded-lg bg-secondary/50 px-4 py-3 text-sm">
                 <span className="text-muted-foreground">Total package cost ({formValues?.guests} traveler{formValues?.guests && formValues.guests > 1 ? "s" : ""})</span>
-                <span className="font-bold">₹{totalPackagePrice.toLocaleString()}</span>
+                <span className="font-bold">{formatAmount(totalPackagePriceInCurrency)}</span>
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none">
-                  Advance Amount (₹)
+                  Advance Amount ({currencyConfig.symbol} {currency})
                 </label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold">
-                    ₹
+                    {currencyConfig.symbol}
                   </span>
                   <Input
                     type="number"
-                    min={500}
-                    max={totalPackagePrice}
-                    placeholder={`e.g. ${Math.min(5000, totalPackagePrice)}`}
+                    min={minAdvanceAmount}
+                    max={totalPackagePriceInCurrency}
+                    placeholder={`e.g. ${Math.min(quickSelectValues[1] || 50, totalPackagePriceInCurrency)}`}
                     value={advanceAmount}
                     onChange={(e) => {
                       setAdvanceAmount(e.target.value);
@@ -406,7 +425,7 @@ export function BookingModal({
                   <p className="text-sm text-destructive font-medium">{advanceError}</p>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  Minimum ₹500 · Maximum ₹{totalPackagePrice.toLocaleString()}
+                  Minimum {currencyConfig.symbol}{minAdvanceAmount} · Maximum {formatAmount(totalPackagePriceInCurrency)}
                 </p>
               </div>
 
@@ -416,8 +435,8 @@ export function BookingModal({
                   Quick select
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {[1000, 2000, 5000, 10000]
-                    .filter((v) => v <= totalPackagePrice)
+                  {quickSelectValues
+                    .filter((v) => v <= totalPackagePriceInCurrency)
                     .map((v) => (
                       <button
                         key={v}
@@ -428,7 +447,7 @@ export function BookingModal({
                         }}
                         className="rounded-full border border-border px-3 py-1 text-xs sm:text-sm hover:bg-secondary font-medium transition-colors"
                       >
-                        ₹{v.toLocaleString()}
+                        {currencyConfig.symbol}{v.toLocaleString()}
                       </button>
                     ))}
                 </div>
@@ -439,11 +458,10 @@ export function BookingModal({
                 <p className="text-xs text-muted-foreground">
                   This advance payment secures your seat and dates. Remaining balance of{" "}
                   <strong>
-                    ₹
-                    {Math.max(
+                    {formatAmount(Math.max(
                       0,
-                      totalPackagePrice - (parseFloat(advanceAmount) || 0)
-                    ).toLocaleString()}
+                      totalPackagePriceInCurrency - (parseFloat(advanceAmount) || 0)
+                    ))}
                   </strong>{" "}
                   is due prior to tour commencement.
                 </p>
@@ -460,7 +478,7 @@ export function BookingModal({
                     Connecting to PayGlocal...
                   </>
                 ) : (
-                  `Pay ₹${advanceAmount ? parseFloat(advanceAmount).toLocaleString() : "—"} via PayGlocal`
+                  `Pay ${advanceAmount ? `${currencyConfig.symbol}${parseFloat(advanceAmount).toLocaleString()}` : "—"} via PayGlocal`
                 )}
               </Button>
 

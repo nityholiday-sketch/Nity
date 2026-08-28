@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from "react";
@@ -10,6 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import type { Package } from "@/lib/data";
 import { BookingModal } from "@/components/booking-modal";
+import { useCurrency } from "@/context/currency-context";
 
 const transportIcons: { [key: string]: React.ReactNode } = {
   Flight: <Plane className="h-5 w-5" />,
@@ -24,6 +24,7 @@ interface PackageDetailsClientProps {
 
 export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const { formatPrice } = useCurrency();
 
   return (
     <div className="py-12">
@@ -97,9 +98,8 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center">
-                  <span className="font-bold text-xl mr-1">₹</span>
-                  <span className="font-bold text-xl">{pkg.price.toLocaleString()}</span>
-                  <span className="text-muted-foreground ml-1">/ person</span>
+                  <span className="font-bold text-2xl text-primary">{formatPrice(pkg.price)}</span>
+                  <span className="text-muted-foreground ml-1.5 text-sm">/ person</span>
                 </div>
                 <div className="flex items-center">
                   <Clock className="h-5 w-5 mr-3 text-primary" />

@@ -50,6 +50,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { CurrencyProvider } from '@/context/currency-context';
+
 export const viewport: Viewport = {
   themeColor: '#013220',
 };
@@ -62,15 +64,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
       <body className="font-body antialiased">
-        <div className="flex min-h-screen flex-col">
-          <Header />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
-        </div>
-        <FloatingWhatsapp />
-        <Toaster />
+        <CurrencyProvider>
+          <div className="flex min-h-screen flex-col">
+            <Header />
+            <main className="flex-1">
+              {children}
+            </main>
+            <Footer />
+          </div>
+          <FloatingWhatsapp />
+          <Toaster />
+        </CurrencyProvider>
       </body>
     </html>
   );

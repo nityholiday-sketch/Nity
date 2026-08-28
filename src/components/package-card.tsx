@@ -1,15 +1,20 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Clock, MapPin, Star } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { Package } from "@/lib/data";
+import { useCurrency } from "@/context/currency-context";
 
 interface PackageCardProps {
   pkg: Package;
 }
 
 export function PackageCard({ pkg }: PackageCardProps) {
+  const { formatPrice } = useCurrency();
+
   return (
     <Card className="flex flex-col overflow-hidden transition-all hover:shadow-xl border rounded-lg">
       <CardHeader className="p-0 relative">
@@ -22,8 +27,8 @@ export function PackageCard({ pkg }: PackageCardProps) {
             data-ai-hint="travel destination"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
-           <div className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-primary font-bold text-lg p-2 rounded-md">
-             ₹{pkg.price.toLocaleString()}
+           <div className="absolute top-2 right-2 bg-white/80 dark:bg-background/80 backdrop-blur-sm text-primary font-bold text-lg p-2 rounded-md shadow-sm">
+             {formatPrice(pkg.price)}
            </div>
            {pkg.featured && (
              <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold p-1 px-2 rounded-full flex items-center gap-1">

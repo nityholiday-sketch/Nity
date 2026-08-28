@@ -29,7 +29,7 @@ export function getPayGlocalConfig(): PayGlocalConfig {
   }
 
   return {
-    merchantId: process.env.PAYGLOCAL_MERCHANT_ID || 'nityholiday_test',
+    merchantId: process.env.PAYGLOCAL_MERCHANT_ID || 'nityholiday',
     keyId: process.env.PAYGLOCAL_KEY_ID || '',
     privateKey: privateKey || undefined,
     publicKeyId: process.env.PAYGLOCAL_PUBLIC_KEY_ID || '',
@@ -112,7 +112,6 @@ export function parsePayGlocalToken(token: string): {
   try {
     const parts = token.split('.');
     if (parts.length < 2) {
-      // If token is plain JSON or malformed
       try {
         const parsed = JSON.parse(token);
         return { payload: parsed, valid: true };
@@ -150,7 +149,7 @@ export interface PayCollectInitiateParams {
   merchantTxnId: string;
   merchantUniqueId: string;
   amount: number | string;
-  currency?: string;
+  currency?: string; // 'INR' | 'USD'
   customer: {
     name: string;
     email: string;
@@ -187,6 +186,7 @@ export async function initiatePayCollectPayment(
   params: PayCollectInitiateParams
 ): Promise<PayCollectInitiateResponse> {
   const config = getPayGlocalConfig();
+  const currency = (params.currency || 'INR').toUpperCase();
 
   // Split customer name into first and last name
   const nameParts = (params.customer.name || 'Valued Guest').trim().split(/\s+/);
@@ -196,7 +196,12 @@ export async function initiatePayCollectPayment(
   // Sanitize phone number and extract calling code
   let phone = (params.customer.mobile || '').replace(/\D/g, '');
   let callingCode = '+91';
-  if (phone.length > 10 && phone.startsWith('91')) {
+  let countryCode = 'IN';
+
+  if (currency === 'USD') {
+    countryCode = 'US';
+    callingCode = phone.length === 10 ? '+1' : '+91';
+  } else if (phone.length > 10 && phone.startsWith('91')) {
     phone = phone.slice(2);
   }
 
@@ -205,15 +210,15 @@ export async function initiatePayCollectPayment(
     merchantUniqueId: params.merchantUniqueId,
     paymentData: {
       totalAmount: Number(params.amount).toFixed(2),
-      txnCurrency: params.currency || 'INR',
+      txnCurrency: currency,
       billingData: {
         firstName,
         lastName,
-        addressStreet1: 'India',
-        addressCity: 'Delhi',
-        addressState: 'Delhi',
-        addressPostalCode: '110001',
-        addressCountry: 'IN',
+        addressStreet1: 'Main Street',
+        addressCity: currency === 'USD' ? 'New York' : 'Delhi',
+        addressState: currency === 'USD' ? 'New York' : 'Delhi',
+        addressPostalCode: currency === 'USD' ? '10001' : '110001',
+        addressCountry: countryCode,
         emailId: params.customer.email,
         callingCode,
         phoneNumber: phone,
@@ -235,6 +240,10 @@ export async function initiatePayCollectPayment(
         ipAddress: params.customer.ipAddress || '127.0.0.1',
         httpAccept: params.customer.httpAccept || 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         httpUserAgent: params.customer.userAgent || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+      shippingData: {
+        addressCountry: countryCode,
+        emailId: params.customer.email,
       },
     },
     merchantCallbackURL: params.merchantCallbackURL,
@@ -263,9 +272,9 @@ export async function initiatePayCollectPayment(
       body: JSON.stringify(payload),
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => ({}));
 
-    if (response.ok && data.status === 'CREATED' && data.data?.redirectUrl) {
+    if (response.ok && (data.status === 'CREATED' || data.status === 'SUCCESS') && data.data?.redirectUrl) {
       return {
         success: true,
         gid: data.gid,
@@ -277,11 +286,25 @@ export async function initiatePayCollectPayment(
       };
     }
 
-    // Handle API errors
-    const errorMessage =
+    // Check if error is authentication failure
+    let errorMessage =
       data.message ||
       (Array.isArray(data.errors) && data.errors.length > 0 ? data.errors.join(', ') : null) ||
-      `PayGlocal rejected request with status ${data.status || response.status}`;
+      `PayGlocal responded with status ${data.status || response.status}`;
+
+    if (
+      errorMessage.toLowerCase().includes('authentication failed') ||
+      response.status === 401 ||
+      !config.privateKey
+    ) {
+      if (!config.privateKey || !config.keyId) {
+        errorMessage =
+          "PayGlocal Authentication Missing: Please add your Merchant Private Key (PAYGLOCAL_PRIVATE_KEY) and Key ID (PAYGLOCAL_KEY_ID) from PayGlocal GCC to .env.local.";
+      } else {
+        errorMessage =
+          `PayGlocal Authentication Failed: Merchant ID '${config.merchantId}' or Key ID '${config.keyId}' was not recognized by PayGlocal ${config.environment.toUpperCase()} servers. Please verify credentials in PayGlocal Control Center.`;
+      }
+    }
 
     return {
       success: false,

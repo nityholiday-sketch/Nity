@@ -7,6 +7,7 @@ export async function POST(req: Request) {
     const {
       packageName,
       amount,
+      currency = 'INR',
       customer_name,
       customer_email,
       customer_mobile,
@@ -55,7 +56,7 @@ export async function POST(req: Request) {
       merchantTxnId,
       merchantUniqueId,
       amount: Number(amount),
-      currency: 'INR',
+      currency: (currency || 'INR').toUpperCase(),
       customer: {
         name: customer_name,
         email: customer_email,
@@ -81,6 +82,7 @@ export async function POST(req: Request) {
         gid: result.gid,
         merchantTxnId,
         merchantUniqueId,
+        currency,
         message: result.message || 'Payment initiation successful.',
       });
     }
