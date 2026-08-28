@@ -93,6 +93,7 @@ export async function POST(req: Request) {
       {
         success: false,
         error: result.error || 'Failed to initiate PayGlocal payment.',
+        redirectUrl: result.redirectUrl,
       },
       { status: 400 }
     );

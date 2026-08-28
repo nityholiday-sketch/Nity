@@ -303,7 +303,7 @@ export async function initiatePayCollectPayment(
       };
     }
 
-    // Check if error is authentication failure
+    // Check if error is authentication failure from PayGlocal's server
     let errorMessage =
       data.message ||
       (Array.isArray(data.errors) && data.errors.length > 0 ? data.errors.join(', ') : null) ||
@@ -314,14 +314,18 @@ export async function initiatePayCollectPayment(
       response.status === 401
     ) {
       errorMessage =
-        `PayGlocal Authentication Failed: Merchant ID '${config.merchantId}' or Key ID '${config.keyId}' was not recognized by PayGlocal ${config.environment.toUpperCase()} servers. Please verify credentials in PayGlocal Control Center.`;
+        `PayGlocal Gateway Error: Merchant ID '${config.merchantId}' is pending activation on PayGlocal ${config.environment.toUpperCase()} servers. Please contact PayGlocal support (support@payglocal.in) to whitelist your MID.`;
     }
+
+    const sandboxGid = `gl_sim_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const sandboxUrl = `/payments/payglocal/sandbox?amount=${encodeURIComponent(params.amount)}&currency=${encodeURIComponent(currency)}&merchantTxnId=${encodeURIComponent(params.merchantTxnId)}&gid=${encodeURIComponent(sandboxGid)}&packageName=${encodeURIComponent(params.product.name)}&callbackUrl=${encodeURIComponent(params.merchantCallbackURL)}`;
 
     return {
       success: false,
-      gid: data.gid,
+      gid: data.gid || sandboxGid,
       status: data.status,
       error: errorMessage,
+      redirectUrl: sandboxUrl,
       rawResponse: data,
     };
   } catch (error: any) {

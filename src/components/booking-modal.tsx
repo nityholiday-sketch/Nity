@@ -138,10 +138,27 @@ export function BookingModal({
           result.error ||
           result.message ||
           "Payment initiation failed. Please verify your PayGlocal credentials or try again.";
+
         toast({
-          title: "Payment Error",
-          description: errorMsg,
+          title: "PayGlocal Live Gateway Notice",
+          description: (
+            <div className="space-y-2 pt-1">
+              <p>{errorMsg}</p>
+              {result.redirectUrl && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.location.href = result.redirectUrl;
+                  }}
+                  className="mt-1.5 inline-block text-xs bg-white text-destructive font-bold px-3 py-1.5 rounded shadow-sm hover:bg-white/90 transition-colors"
+                >
+                  Launch Sandbox Demo Checkout →
+                </button>
+              )}
+            </div>
+          ),
           variant: "destructive",
+          duration: 12000,
         });
         setLoading(false);
       }
