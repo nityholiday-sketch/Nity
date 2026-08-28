@@ -21,6 +21,7 @@ function PaymentStatusContent() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<"SUCCESS" | "FAILURE" | "PENDING">("PENDING");
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [gid, setGid] = useState<string | null>(null);
   const [trackingId, setTrackingId] = useState<string | null>(null);
   const [amount, setAmount] = useState<string | null>(null);
   const [packageName, setPackageName] = useState<string | null>(null);
@@ -29,13 +30,15 @@ function PaymentStatusContent() {
   useEffect(() => {
     const s = searchParams.get("status");
     const oid = searchParams.get("order_id");
+    const payglocalGid = searchParams.get("gid");
     const tid = searchParams.get("tracking_id");
     const amt = searchParams.get("amount");
     const pkg = searchParams.get("package");
     const msg = searchParams.get("msg");
 
     setOrderId(oid);
-    setTrackingId(tid);
+    setGid(payglocalGid);
+    setTrackingId(tid || payglocalGid);
     setAmount(amt);
     setPackageName(pkg);
     setErrorMessage(msg);
@@ -50,9 +53,9 @@ function PaymentStatusContent() {
   }, [searchParams]);
 
   const whatsappMessage = encodeURIComponent(
-    `Hello Nityholiday! My CCAvenue payment of ₹${amount || ""} for ${
+    `Hello Nityholiday! My PayGlocal payment of ₹${amount || ""} for ${
       packageName || "Holiday Package"
-    } was successful. (Order ID: ${orderId || ""}, Tracking ID: ${trackingId || ""}). Please share the confirmation voucher.`
+    } was successful. (PayGlocal ID: ${gid || trackingId || ""}, Order ID: ${orderId || ""}). Please share the confirmation voucher.`
   );
 
   return (
@@ -94,7 +97,7 @@ function PaymentStatusContent() {
 
         <CardDescription className="text-base pt-1">
           {status === "SUCCESS" &&
-            "Thank you! Your payment was processed securely via CCAvenue."}
+            "Thank you! Your payment was processed securely via PayGlocal."}
           {status === "FAILURE" &&
             (errorMessage ||
               "The transaction was declined or cancelled. If your account was debited, the amount will be automatically reversed.")}
@@ -132,16 +135,16 @@ function PaymentStatusContent() {
               </div>
             )}
 
-            {trackingId && (
+            {(gid || trackingId) && (
               <div className="flex justify-between">
-                <span className="text-muted-foreground">CCAvenue Ref / Tracking:</span>
-                <span className="font-mono font-medium text-xs sm:text-sm">{trackingId}</span>
+                <span className="text-muted-foreground">PayGlocal GID:</span>
+                <span className="font-mono font-medium text-xs sm:text-sm">{gid || trackingId}</span>
               </div>
             )}
 
             <div className="flex items-center gap-1.5 pt-2 text-xs text-green-600 font-medium">
               <ShieldCheck className="h-4 w-4 flex-shrink-0" />
-              <span>Verified 100% Secure Transaction by CCAvenue</span>
+              <span>Verified 100% Secure Transaction by PayGlocal</span>
             </div>
           </div>
         )}

@@ -14,19 +14,34 @@ env:
       - BUILD
       - RUNTIME
 
-  # --- CCAVENUE PAYMENT GATEWAY ---
-  - variable: CCAVENUE_MERCHANT_ID
-    value: "4394334"
+  # --- PAYGLOCAL PAYMENT GATEWAY ---
+  - variable: PAYGLOCAL_MERCHANT_ID
+    value: "nityholiday"
     availability:
       - RUNTIME
 
-  - variable: CCAVENUE_ACCESS_CODE
-    value: "AVCU82MG22BA07UCAB"
+  - variable: PAYGLOCAL_ENV
+    value: "production"
     availability:
       - RUNTIME
 
-  - variable: CCAVENUE_WORKING_KEY
-    value: "838ACE370BB450A254AE3FF02355588F"
+  - variable: PAYGLOCAL_KEY_ID
+    value: ""
+    availability:
+      - RUNTIME
+
+  - variable: PAYGLOCAL_PRIVATE_KEY
+    value: ""
+    availability:
+      - RUNTIME
+
+  - variable: PAYGLOCAL_PUBLIC_KEY_ID
+    value: ""
+    availability:
+      - RUNTIME
+
+  - variable: PAYGLOCAL_PUBLIC_CERT
+    value: "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwhl4wmBzV1IJGtPMkGuK\nhW0S/ZlE7tytzhLrF33K8dE77Y/cfFiNkfungu0nrNzV1TVBgjimQp1L+9LHjr0H\nkBk/e/uf2aQqXoFklAwV1moQBrAmcJup2V29aZh7uzR90cHVcD5HotEkgKhDn2XP\nFaV+Rh7tznLfPjjLzvhprjP44m3DPMH/fm1cBk8vLhV0AnPwXJrQ3pXiVk6y9XHa\nQCRIOF9O2bijHY04dx06bU206gCokq3PJXSxPIn8IUAUPmAhWUuhZ2+YCwYyO4Sb\nHTRuK/5tWhzWy61z8yV6LqNgHJ6gJX5AFnZE8huFmjf7EWo32R6lL2OPRhWn7Jsu\n4QIDAQAB\n-----END PUBLIC KEY-----"
     availability:
       - RUNTIME
 

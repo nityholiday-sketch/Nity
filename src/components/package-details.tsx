@@ -134,7 +134,7 @@ export function PackageDetailsClient({ pkg }: PackageDetailsClientProps) {
                     Book Tour Now
                   </Button>
                   <p className="text-xs text-center text-muted-foreground mt-4">
-                      Instant confirmation &amp; 100% secure payment via CCAvenue.
+                      Instant confirmation &amp; 100% secure payment via PayGlocal.
                   </p>
                 </CardContent>
              </Card>

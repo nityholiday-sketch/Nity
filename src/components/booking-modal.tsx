@@ -99,12 +99,12 @@ export function BookingModal({
     setStep("payment-type");
   }
 
-  // Redirects to CCAvenue secure checkout
-  async function initiateCCAvenuePayment(payAmount: number) {
+  // Redirects to PayGlocal secure checkout
+  async function initiatePayGlocalPayment(payAmount: number) {
     if (!formValues) return;
     setLoading(true);
     try {
-      const response = await fetch("/api/payments/ccavenue/initiate", {
+      const response = await fetch("/api/payments/payglocal/initiate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -120,26 +120,9 @@ export function BookingModal({
 
       const result = await response.json();
 
-      if (response.ok && result.success && result.encRequest && result.access_code && result.actionUrl) {
-        // Create a hidden form and submit to CCAvenue
-        const formElement = document.createElement("form");
-        formElement.method = "POST";
-        formElement.action = result.actionUrl;
-
-        const encInput = document.createElement("input");
-        encInput.type = "hidden";
-        encInput.name = "encRequest";
-        encInput.value = result.encRequest;
-        formElement.appendChild(encInput);
-
-        const accessInput = document.createElement("input");
-        accessInput.type = "hidden";
-        accessInput.name = "access_code";
-        accessInput.value = result.access_code;
-        formElement.appendChild(accessInput);
-
-        document.body.appendChild(formElement);
-        formElement.submit();
+      if (response.ok && result.success && result.redirectUrl) {
+        // Step 5 of PayGlocal guide: Browser redirects to PayGlocal's URL using GET method
+        window.location.href = result.redirectUrl;
       } else {
         const errorMsg =
           result.error ||
@@ -158,7 +141,7 @@ export function BookingModal({
         description: error.message || "Failed to connect to the payment server.",
         variant: "destructive",
       });
-      console.error("CCAvenue Connection Error:", error);
+      console.error("PayGlocal Connection Error:", error);
       setLoading(false);
     }
   }
@@ -174,7 +157,7 @@ export function BookingModal({
       return;
     }
     setAdvanceError("");
-    initiateCCAvenuePayment(val);
+    initiatePayGlocalPayment(val);
   }
 
   return (
@@ -281,7 +264,7 @@ export function BookingModal({
                 <div className="bg-secondary/60 p-3.5 rounded-lg flex items-start gap-2.5 mt-2">
                   <ShieldCheck className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Payments are encrypted &amp; processed securely via <strong>CCAvenue</strong> (Credit/Debit Card, NetBanking, UPI, Wallets).
+                    Payments are encrypted &amp; processed securely via <strong>PayGlocal</strong> (Credit/Debit Card, NetBanking, UPI, International Cards, Wallets).
                   </p>
                 </div>
 
@@ -308,7 +291,7 @@ export function BookingModal({
             <div className="pt-4 space-y-4">
               {/* Full Payment */}
               <button
-                onClick={() => initiateCCAvenuePayment(totalPackagePrice)}
+                onClick={() => initiatePayGlocalPayment(totalPackagePrice)}
                 disabled={loading}
                 className="w-full text-left rounded-xl border-2 border-primary/30 hover:border-primary bg-primary/5 hover:bg-primary/10 p-4 sm:p-5 transition-all duration-200 group disabled:opacity-60 disabled:cursor-not-allowed"
               >
@@ -364,7 +347,7 @@ export function BookingModal({
               {loading && (
                 <div className="p-4 bg-primary/10 rounded-lg flex items-center justify-center gap-3 text-primary">
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  <span className="text-sm font-medium">Redirecting to CCAvenue secure checkout...</span>
+                  <span className="text-sm font-medium">Redirecting to PayGlocal secure checkout...</span>
                 </div>
               )}
 
@@ -474,10 +457,10 @@ export function BookingModal({
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Connecting to CCAvenue...
+                    Connecting to PayGlocal...
                   </>
                 ) : (
-                  `Pay ₹${advanceAmount ? parseFloat(advanceAmount).toLocaleString() : "—"} via CCAvenue`
+                  `Pay ₹${advanceAmount ? parseFloat(advanceAmount).toLocaleString() : "—"} via PayGlocal`
                 )}
               </Button>
 
