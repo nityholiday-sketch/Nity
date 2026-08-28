@@ -26,17 +26,17 @@ env:
       - RUNTIME
 
   - variable: PAYGLOCAL_KEY_ID
-    value: ""
+    value: "kId-CcQgeBkpNx6HONBy"
     availability:
       - RUNTIME
 
   - variable: PAYGLOCAL_PRIVATE_KEY
-    value: ""
+    value: "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKgwggSlAgEAAoIBAQDlXWfp69D5HVtk\n6NUNy5q/fk4d3stAFbsax0ge/PhRxhktOlj5lMU1CszASJJnZH2S4lTiOmszMhY4\nlBsRg/nZdyC+ZRSCjeY2UplHZNfJdR2atW0eTkP9pOMfPoLtdH1jgaagCVMJzjLm\nx/sRBZl7BtdKpKIwHdDZBoJR9vqfvVpqbXrn3VzauBj3RSr+GDPhE7jSQKEWfAUE\nvKwMhuoXZyl/np0SeMHBxJt8I2m/atm3FM9umwF3Hiv8wM0Lq3RI7rPeoGwYQWBj\ny9Z+Y4qGDjMc9GoBlCkuCZYpJ9gsh1vi8psLDfhnwpdISshJeMOu+EN3ubCPivXK\nNuXwy4F7AgMBAAECggEAXFL43QP7HgtfGoNOHztxkts4fnWLwsP8iI7mzPJu0hu3\nTqlJ30yvBObP/CY6KDwe/9zy5g010Wm74BJdwvMowwxctcbiNpr/q6Yb5M0GvyTR\nQdD9l1FRtOuGMLFs6kAVqNQrSgf20N+bRaIBwZxLZ2YdiwIx9sRJqNIh6vRLdbhz\nYdwHrmf/E98un3PJF7XzlsGI2EbrKz8RWVL9+f9bBOwrCyCZXIgxItsTdh+lZVT9\nvQofTMy0nnYXS9z37OlNXDjqwLxZFCyS9MYZTXG/psYiiKz3ogP6Lfw0+Sbenl+v\n/1FZlIHY6AbALRLuUoPElR4ovnCjdihz70pRoR5rwQKBgQD5Dd5B6XJs9rWfuWMa\nQUNQsqWRGfUFaQJnzk1NbGMQfW5ET2CHHtUiqjWhXWmta1/WiJqk5k6TSVPPW8GM\nWFRiEOe2UOehSEuIk1d8y5q6/m+7G6m+YyNNgPmDm+XJnfpR5/d8/b81OUo5j2mP\nkL+idbkIPBU1uwY43tf5ra/lKQKBgQDrwvcVLj5mNP/ZQAiRHHyVu+iMyFRFDiWv\nc/UGOp6yZK8am51WsB7tgx6AONu0mBr5sL/XAhF98l+sxIMn6rhxEtF4qn6Ch4zP\n1/mNGM4yFO93vq+hkzn39GyzW85sIhyj0qzuP/hDiDgVLKQ+1zaYlAOXB7EJxF8Q\nnKqRoRWCAwKBgQCl0XfzRmyq46+VQqca6ezZo7fcXf3mtj2lw5NwQwPKDNkHnhnU\nnNCnHdBLOZiMn/rVKWpc9AHIyn+EhcDdokm8aSj9F+zAUxQHQKJ1MlI4wgK9/vML\nEZKFnaOC3p8ll4r8UYdTrtZJp3Ul0bgkn+kXT238b5Rni7fe0W/Wiq+b0QKBgQDn\n7xiWHLVEZVVhi44h+81QnNitTxMgEEfgsInXQ+oFg+mDmp2Rv5fdfwWNjOIPayf2\nhfxkb+N3bO7Uj0qcBVzH2IR8WfY1QVa0zjrxpPqM6G2g9tXfdXAsz6f0Vxfe5zwX\nqlV32TTKcwMBSbaXH6/VMJ/Lf8SZ4DbJp+ZheAApswKBgQCnaPgVA4WAiAOZdOsU\nW1R2TcWEIlUKQSK8yzyvsqAHiLyEKfF8LIpNsUFI1VDYkNWpWIZea4O7oeq6Hqni\npEFTQk5pbZXI2mLAwks+HJvsI958Jk/iEv5KNx/Vozn51mtbgX9+aPQInnJ+mkXt\nuInDvMzQGDPNhoaFqObxZ8+WcA==\n-----END PRIVATE KEY-----"
     availability:
       - RUNTIME
 
   - variable: PAYGLOCAL_PUBLIC_KEY_ID
-    value: ""
+    value: "8cc91c8d-8030-4660-a9c7-33de886fb495"
     availability:
       - RUNTIME
 

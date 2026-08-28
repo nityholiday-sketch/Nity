@@ -10,29 +10,32 @@ export interface PayGlocalConfig {
   baseUrl: string;
 }
 
+function formatPemKey(key: string, type: 'PUBLIC KEY' | 'PRIVATE KEY'): string {
+  if (!key) return '';
+  let formatted = key.trim();
+  if (!formatted.includes('\n') && formatted.includes('\\n')) {
+    formatted = formatted.replace(/\\n/g, '\n');
+  }
+  if (!formatted.includes('-----BEGIN')) {
+    formatted = `-----BEGIN ${type}-----\n${formatted}\n-----END ${type}-----`;
+  }
+  return formatted;
+}
+
 export function getPayGlocalConfig(): PayGlocalConfig {
   const environment = (process.env.PAYGLOCAL_ENV || 'uat').toLowerCase() === 'production' ? 'production' : 'uat';
   const baseUrl = environment === 'production'
     ? 'https://api.prod.payglocal.in'
     : 'https://api.uat.payglocal.in';
 
-  // Format private key if provided with escaped newlines
-  let privateKey = process.env.PAYGLOCAL_PRIVATE_KEY || '';
-  if (privateKey && !privateKey.includes('\n') && privateKey.includes('\\n')) {
-    privateKey = privateKey.replace(/\\n/g, '\n');
-  }
-
-  // Format public certificate if provided with escaped newlines
-  let publicCert = process.env.PAYGLOCAL_PUBLIC_CERT || '';
-  if (publicCert && !publicCert.includes('\n') && publicCert.includes('\\n')) {
-    publicCert = publicCert.replace(/\\n/g, '\n');
-  }
+  const privateKey = formatPemKey(process.env.PAYGLOCAL_PRIVATE_KEY || '', 'PRIVATE KEY');
+  const publicCert = formatPemKey(process.env.PAYGLOCAL_PUBLIC_CERT || '', 'PUBLIC KEY');
 
   return {
     merchantId: process.env.PAYGLOCAL_MERCHANT_ID || 'nitytrav561617',
-    keyId: process.env.PAYGLOCAL_KEY_ID || '',
+    keyId: process.env.PAYGLOCAL_KEY_ID || 'kId-CcQgeBkpNx6HONBy',
     privateKey: privateKey || undefined,
-    publicKeyId: process.env.PAYGLOCAL_PUBLIC_KEY_ID || '',
+    publicKeyId: process.env.PAYGLOCAL_PUBLIC_KEY_ID || '8cc91c8d-8030-4660-a9c7-33de886fb495',
     publicCert: publicCert || undefined,
     environment,
     baseUrl,
