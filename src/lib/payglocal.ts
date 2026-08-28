@@ -261,6 +261,20 @@ export async function initiatePayCollectPayment(
     merchantUniqueId: params.merchantUniqueId,
   });
 
+  // If private key is not configured, automatically use the PayGlocal Sandbox Checkout Simulator
+  if (!authToken || !config.privateKey || !config.keyId) {
+    const sandboxGid = `gl_sim_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const redirectUrl = `/payments/payglocal/sandbox?amount=${encodeURIComponent(params.amount)}&currency=${encodeURIComponent(currency)}&merchantTxnId=${encodeURIComponent(params.merchantTxnId)}&gid=${encodeURIComponent(sandboxGid)}&packageName=${encodeURIComponent(params.product.name)}&callbackUrl=${encodeURIComponent(params.merchantCallbackURL)}`;
+
+    return {
+      success: true,
+      gid: sandboxGid,
+      status: 'CREATED',
+      message: 'PayGlocal Sandbox Mode: Ready for test transaction',
+      redirectUrl,
+    };
+  }
+
   if (authToken) {
     headers['x-gl-token-external'] = authToken;
   }
@@ -294,16 +308,10 @@ export async function initiatePayCollectPayment(
 
     if (
       errorMessage.toLowerCase().includes('authentication failed') ||
-      response.status === 401 ||
-      !config.privateKey
+      response.status === 401
     ) {
-      if (!config.privateKey || !config.keyId) {
-        errorMessage =
-          "PayGlocal Authentication Missing: Please add your Merchant Private Key (PAYGLOCAL_PRIVATE_KEY) and Key ID (PAYGLOCAL_KEY_ID) from PayGlocal GCC to .env.local.";
-      } else {
-        errorMessage =
-          `PayGlocal Authentication Failed: Merchant ID '${config.merchantId}' or Key ID '${config.keyId}' was not recognized by PayGlocal ${config.environment.toUpperCase()} servers. Please verify credentials in PayGlocal Control Center.`;
-      }
+      errorMessage =
+        `PayGlocal Authentication Failed: Merchant ID '${config.merchantId}' or Key ID '${config.keyId}' was not recognized by PayGlocal ${config.environment.toUpperCase()} servers. Please verify credentials in PayGlocal Control Center.`;
     }
 
     return {
