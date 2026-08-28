@@ -29,7 +29,7 @@ export function getPayGlocalConfig(): PayGlocalConfig {
   }
 
   return {
-    merchantId: process.env.PAYGLOCAL_MERCHANT_ID || 'nityholiday',
+    merchantId: process.env.PAYGLOCAL_MERCHANT_ID || 'nitytrav561617',
     keyId: process.env.PAYGLOCAL_KEY_ID || '',
     privateKey: privateKey || undefined,
     publicKeyId: process.env.PAYGLOCAL_PUBLIC_KEY_ID || '',

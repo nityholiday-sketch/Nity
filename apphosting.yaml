@@ -16,7 +16,7 @@ env:
 
   # --- PAYGLOCAL PAYMENT GATEWAY ---
   - variable: PAYGLOCAL_MERCHANT_ID
-    value: "nityholiday"
+    value: "nitytrav561617"
     availability:
       - RUNTIME
 
