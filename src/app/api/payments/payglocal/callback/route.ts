@@ -29,32 +29,37 @@ export async function POST(req: Request) {
       });
     }
 
-    let status = '';
+    let status = directParams.status || '';
     let gid = directParams.gid || '';
     let merchantTxnId = directParams.merchantTxnId || directParams.merchantUniqueId || '';
     let amount = directParams.amount || '';
+    let currency = directParams.currency || directParams.txnCurrency || 'INR';
+    let packageName = directParams.package || directParams.packageName || '';
     let reasonCode = directParams.reasonCode || '';
     let message = directParams.message || '';
 
     // If x-gl-token is provided, parse and extract payload details
     if (token) {
-      const { payload, valid } = parsePayGlocalToken(token);
+      const { payload } = parsePayGlocalToken(token);
       if (payload) {
         status = payload.status || status;
         gid = payload.gid || gid;
         merchantTxnId = payload.merchantTxnId || payload.merchantUniqueId || merchantTxnId;
         amount = payload.amount || payload.totalAmount || amount;
+        currency = payload.currency || payload.txnCurrency || currency;
+        packageName = payload.package || payload.packageName || packageName;
         reasonCode = payload.reasonCode || reasonCode;
         message = payload.message || message;
       }
     }
 
-    // If status is still ambiguous or CREATED/INPROGRESS, query PayGlocal Get Status API
-    if (gid && (!status || status === 'CREATED' || status === 'INPROGRESS')) {
+    // If status is still ambiguous or CREATED/INPROGRESS and is a real PayGlocal GID
+    if (gid && !gid.startsWith('gl_sim_') && (!status || status === 'CREATED' || status === 'INPROGRESS')) {
       const statusRes = await getPayGlocalPaymentStatus(gid);
       if (statusRes?.data?.status) {
         status = statusRes.data.status;
         amount = statusRes.data.Amount || amount;
+        currency = statusRes.data.currency || statusRes.data.txnCurrency || currency;
         merchantTxnId = statusRes.data.merchantTxnId || merchantTxnId;
         message = statusRes.data.detailedMessage || message;
       } else if (statusRes?.status) {
@@ -62,12 +67,13 @@ export async function POST(req: Request) {
       }
     }
 
-    // PayGlocal successful statuses: SENT_FOR_CAPTURE, AUTHORIZED, CAPTURED, SUCCESS
+    // PayGlocal successful statuses: SENT_FOR_CAPTURE, AUTHORIZED, CAPTURED, SUCCESS, COMPLETED
     const isSuccess =
       status === 'SENT_FOR_CAPTURE' ||
       status === 'AUTHORIZED' ||
       status === 'CAPTURED' ||
-      status === 'SUCCESS';
+      status === 'SUCCESS' ||
+      status === 'COMPLETED';
 
     const host = req.headers.get('host');
     const protocol = req.headers.get('x-forwarded-proto') || 'https';
@@ -81,6 +87,8 @@ export async function POST(req: Request) {
     if (gid) redirectUrl.searchParams.set('gid', gid);
     if (merchantTxnId) redirectUrl.searchParams.set('order_id', merchantTxnId);
     if (amount) redirectUrl.searchParams.set('amount', amount);
+    if (currency) redirectUrl.searchParams.set('currency', currency);
+    if (packageName) redirectUrl.searchParams.set('package', packageName);
     if (reasonCode) redirectUrl.searchParams.set('reason', reasonCode);
 
     if (!isSuccess) {
@@ -120,6 +128,8 @@ export async function GET(req: Request) {
       let extractedGid = gid || '';
       let orderId = searchParams.get('merchantTxnId') || searchParams.get('order_id') || '';
       let amount = searchParams.get('amount') || '';
+      let currency = searchParams.get('currency') || searchParams.get('txnCurrency') || 'INR';
+      let packageName = searchParams.get('package') || searchParams.get('packageName') || '';
       let message = searchParams.get('message') || '';
 
       if (token) {
@@ -129,15 +139,18 @@ export async function GET(req: Request) {
           extractedGid = payload.gid || extractedGid;
           orderId = payload.merchantTxnId || payload.merchantUniqueId || orderId;
           amount = payload.amount || amount;
+          currency = payload.currency || payload.txnCurrency || currency;
+          packageName = payload.package || payload.packageName || packageName;
           message = payload.message || message;
         }
       }
 
-      if (extractedGid && (!status || status === 'CREATED' || status === 'INPROGRESS')) {
+      if (extractedGid && !extractedGid.startsWith('gl_sim_') && (!status || status === 'CREATED' || status === 'INPROGRESS')) {
         const statusRes = await getPayGlocalPaymentStatus(extractedGid);
         if (statusRes?.data?.status) {
           status = statusRes.data.status;
           amount = statusRes.data.Amount || amount;
+          currency = statusRes.data.currency || statusRes.data.txnCurrency || currency;
           orderId = statusRes.data.merchantTxnId || orderId;
         }
       }
@@ -146,7 +159,8 @@ export async function GET(req: Request) {
         status === 'SENT_FOR_CAPTURE' ||
         status === 'AUTHORIZED' ||
         status === 'CAPTURED' ||
-        status === 'SUCCESS';
+        status === 'SUCCESS' ||
+        status === 'COMPLETED';
 
       const host = req.headers.get('host');
       const protocol = req.headers.get('x-forwarded-proto') || 'https';
@@ -159,6 +173,8 @@ export async function GET(req: Request) {
       if (extractedGid) redirectUrl.searchParams.set('gid', extractedGid);
       if (orderId) redirectUrl.searchParams.set('order_id', orderId);
       if (amount) redirectUrl.searchParams.set('amount', amount);
+      if (currency) redirectUrl.searchParams.set('currency', currency);
+      if (packageName) redirectUrl.searchParams.set('package', packageName);
       if (!isSuccess && message) redirectUrl.searchParams.set('msg', message);
 
       return NextResponse.redirect(redirectUrl.toString(), 303);
