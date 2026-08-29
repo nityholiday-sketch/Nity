@@ -29,12 +29,11 @@ export async function POST(req: Request) {
       );
     }
 
-    // Determine host & protocol for absolute callback URL
     const host = req.headers.get('host');
-    const protocol = req.headers.get('x-forwarded-proto') || 'https';
-    const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL ||
-      (host ? `${protocol}://${host}` : 'https://www.nityholiday.com');
+    const protocol = req.headers.get('x-forwarded-proto') || (host?.includes('localhost') ? 'http' : 'https');
+    const baseUrl = host
+      ? `${protocol}://${host}`
+      : (process.env.NEXT_PUBLIC_APP_URL || 'https://www.nityholiday.com');
 
     // PayGlocal rule: merchantUniqueId & merchantTxnId MUST NOT start with "gl-"
     const timestamp = Date.now();
