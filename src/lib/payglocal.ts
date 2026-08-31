@@ -32,7 +32,7 @@ export function getPayGlocalConfig(): PayGlocalConfig {
   const publicCert = formatPemKey(process.env.PAYGLOCAL_PUBLIC_CERT || '', 'PUBLIC KEY');
 
   return {
-    merchantId: process.env.PAYGLOCAL_MERCHANT_ID || 'nitytrav561617',
+    merchantId: process.env.PAYGLOCAL_MERCHANT_ID || 'ptplnitytrav5607',
     keyId: process.env.PAYGLOCAL_KEY_ID || 'kId-CcQgeBkpNx6HONBy',
     privateKey: privateKey || undefined,
     publicKeyId: process.env.PAYGLOCAL_PUBLIC_KEY_ID || '8cc91c8d-8030-4660-a9c7-33de886fb495',
