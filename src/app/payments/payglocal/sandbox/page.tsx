@@ -84,7 +84,7 @@ function PayGlocalSandboxContent() {
         <div>
           <strong className="font-semibold block">PayGlocal Sandbox Mode</strong>
           <span>
-            You are in local developer simulation mode because <code>PAYGLOCAL_PRIVATE_KEY</code> and <code>PAYGLOCAL_KEY_ID</code> are pending in <code>.env.local</code>. You can test complete payment flows below!
+            You are in local developer simulation mode because <code>PAYGLOCAL_PRIVATE_KEY</code> and <code>PAYGLOCAL_PRIVATE_KEY_ID</code> are pending in <code>.env.local</code>. You can test complete payment flows below!
           </span>
         </div>
       </div>

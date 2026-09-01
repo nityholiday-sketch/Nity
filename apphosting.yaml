@@ -25,7 +25,7 @@ env:
     availability:
       - RUNTIME
 
-  - variable: PAYGLOCAL_KEY_ID
+  - variable: PAYGLOCAL_PRIVATE_KEY_ID
     value: "kId-CcQgeBkpNx6HONBy"
     availability:
       - RUNTIME
