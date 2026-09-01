@@ -22,9 +22,10 @@ export interface PayGlocalConfig {
 function formatPemKey(key: string, type: 'PUBLIC KEY' | 'PRIVATE KEY'): string {
   if (!key) return '';
   let formatted = key.trim();
-  if (!formatted.includes('\n') && formatted.includes('\\n')) {
-    formatted = formatted.replace(/\\n/g, '\n');
+  if ((formatted.startsWith('"') && formatted.endsWith('"')) || (formatted.startsWith("'") && formatted.endsWith("'"))) {
+    formatted = formatted.slice(1, -1);
   }
+  formatted = formatted.replace(/\\n/g, '\n').trim();
   if (!formatted.includes('-----BEGIN')) {
     formatted = `-----BEGIN ${type}-----\n${formatted}\n-----END ${type}-----`;
   }
@@ -108,9 +109,11 @@ async function generateJWE(payload: Record<string, any>, publicKey: string, merc
 
 async function generateJWS(payload: string, privateKey: string, merchantId: string, privateKeyId?: string): Promise<string> {
   let pkcs8Pem = privateKey;
-  if (privateKey.includes('RSA PRIVATE KEY')) {
+  try {
     const k = crypto.createPrivateKey(privateKey);
     pkcs8Pem = k.export({ format: 'pem', type: 'pkcs8' }) as string;
+  } catch (err) {
+    // If already PKCS8, use as is
   }
   const cryptoPrivateKey = await importPKCS8(pkcs8Pem, JWS_ALGORITHM);
   const digestObject = generateDigestObject(payload);
